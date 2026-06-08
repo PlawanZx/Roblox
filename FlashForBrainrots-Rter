@@ -107,8 +107,10 @@ local function ActionChargeButton()
         local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
 
         if button then
+            -- [อัปเดตระบบคำนวณตำแหน่งเมาส์ตรงนี้]
+            local insetTopLeft, _ = GuiService:GetGuiInset()
             local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
-            local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + 36
+            local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
 
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
             task.wait(3.2)
@@ -293,21 +295,21 @@ Tab:CreateToggle({
    CurrentValue = false,
    Flag = "AutoRaidToggle", 
    Callback = function(Value)
-        isUiEnabled = Value 
+       isUiEnabled = Value 
 
-        if isUiEnabled then
-            stopRaid = false
-            onTextChanged() 
-            if PlayerGui:FindFirstChild("BifrostImageQTE") then
-                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
-            end
-            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
-        else
-            stopRaid = true
-            charging = false
-            lastAction = "" 
-            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
-        end
+       if isUiEnabled then
+           stopRaid = false
+           onTextChanged() 
+           if PlayerGui:FindFirstChild("BifrostImageQTE") then
+               task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
+           end
+           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
+       else
+           stopRaid = true
+           charging = false
+           lastAction = "" 
+           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
+       end
    end,
 })
 
@@ -316,12 +318,12 @@ Tab:CreateToggle({
    CurrentValue = false,
    Flag = "AntiAfkToggle",
    Callback = function(Value)
-        antiAfkEnabled = Value 
+       antiAfkEnabled = Value 
 
-        if antiAfkEnabled then
-            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
-        else
-            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
-        end
+       if antiAfkEnabled then
+           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
+       else
+           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
+       end
    end,
 })
