@@ -4,30 +4,42 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "PlawanZ",
-   LoadingTitle = "Loading PlawanZ...",
-   LoadingSubtitle = "by PlawanZ",
+   Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
+   LoadingTitle = "กำลังโหลดค้าบ...",
+   LoadingSubtitle = "by วาฬ",
    ConfigurationSaving = {
       Enabled = false,
    },
-   KeySystem = false,
+   -- [เพิ่มระบบรหัสผ่านตรงนี้]
+   KeySystem = true, -- เปิดใช้งาน Key System
+   KeySettings = {
+      Title = "ใส่รัหสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
+      Subtitle = "กรุณาใส่รหัสผ่านเพื่อเข้าใช้งานครับเสี่ย",
+      Note = "ไม่มีรหัสก็ อดค้าบ !", -- ข้อความใบ้รหัสผ่าน
+      FileName = "WhaleHubKey", -- ชื่อไฟล์สำหรับเซฟรหัสผ่านในโฟลเดอร์ workspace
+      SaveKey = true, -- ตรวจสอบว่าเคยใส่รหัสผ่านไปแล้วหรือยัง (ครั้งหน้าจะได้ไม่ต้องใส่ใหม่)
+      GrabKeyFromSite = false, -- ถ้ามีเว็บแจกคีย์ให้ปรับเป็น true
+      Key = {"1234"} -- ตั้งรหัสผ่านที่ต้องการตรงนี้ (สามารถใส่หลายคีย์ได้ เช่น {"Key1", "Key2"})
+   }
 })
 
 local Tab = Window:CreateTab("ฟังชั่นหลัก", 4483362458) 
-local Section = Tab:CreateSection("Automation & Safety")
+local Section = Tab:CreateSection("ฟาร์มแบบมือถือระเบิด")
 
 -- ==========================================
--- 2. ตัวแปรตั้งต้น
+-- 2. ตัวแปรตั้งต้นจากสคริปต์ของคุณ
 -- ==========================================
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local VirtualUser = game:GetService("VirtualUser") 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
+-- รอให้โหลด Map ให้เสร็จก่อน
 local txtTime = workspace:WaitForChild("Map"):WaitForChild("Event_Objects"):WaitForChild("Storm_Breaker"):WaitForChild("Handle"):WaitForChild("ChargeBarGui"):WaitForChild("ChargeBarContainer"):WaitForChild("Txt_Time")
 local event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("StormBreakerChargeFunction")
 
@@ -38,13 +50,12 @@ local charging = false
 
 local isUiEnabled = false   
 local antiAfkEnabled = false 
-local isGeneralRunEnabled = false 
-local isAligning = false -- ป้องกันการจัดเลนซ้อนทับกัน
 
+-- จุดที่ตั้งใจให้เป็นจุดปลอดภัย (Safe Zone)
 local tpTarget = Vector3.new(4.511472702026367, 3.250000238418579, 14.231565475463867)
 
 -- ==========================================
--- 3. ระบบ Anti-AFK
+-- 3. ระบบ Anti-AFK แบบแยก Toggle
 -- ==========================================
 pcall(function()
     player.Idled:Connect(function()
@@ -57,7 +68,7 @@ pcall(function()
 end)
 
 -- ==========================================
--- 4. ฟังก์ชันการทำงานพื้นฐาน
+-- 4. ฟังก์ชันการทำงานอื่นๆ 
 -- ==========================================
 local function getModelBounds(model)
     if not model then return end
@@ -91,6 +102,59 @@ local function isInAnyPlot()
     return false
 end
 
+local function ActionChargeButton()
+    while not stopRaid and isUiEnabled do 
+        local inside, plot = isInAnyPlot()
+        if inside then
+            local character = player.Character or player.CharacterAdded:Wait()
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                rootPart.CFrame = CFrame.new(tpTarget)
+                task.wait(0.3) 
+            end
+        end
+
+        local dashInterface = player.PlayerGui:FindFirstChild("DashInterface")
+        local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
+
+        if button then
+            local insetTopLeft, _ = GuiService:GetGuiInset()
+            local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
+            local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
+
+            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
+            
+            pcall(function()
+                if getconnections then
+                    for _, conn in pairs(getconnections(button.MouseButton1Down)) do conn:Fire() end
+                    for _, conn in pairs(getconnections(button.InputBegan)) do 
+                        conn:Fire({UserInputType = Enum.UserInputType.MouseButton1, UserInputState = Enum.UserInputState.Begin}) 
+                    end
+                elseif firesignal then
+                    firesignal(button.MouseButton1Down)
+                end
+            end)
+
+            task.wait(3.2)
+
+            VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 1)
+            
+            pcall(function()
+                if getconnections then
+                    for _, conn in pairs(getconnections(button.MouseButton1Up)) do conn:Fire() end
+                    for _, conn in pairs(getconnections(button.InputEnded)) do 
+                        conn:Fire({UserInputType = Enum.UserInputType.MouseButton1, UserInputState = Enum.UserInputState.End}) 
+                    end
+                elseif firesignal then
+                    firesignal(button.MouseButton1Up)
+                end
+            end)
+        end
+        task.wait(0.5)
+    end
+    charging = false
+end
+
 local function PressEnter()
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
     task.wait(0.03)
@@ -105,30 +169,9 @@ local function ReleaseKey(key)
     VirtualInputManager:SendKeyEvent(false, key, false, game)
 end
 
-local function SingleChargeAction()
-    local dashInterface = player.PlayerGui:FindFirstChild("DashInterface")
-    local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
-
-    if button then
-        -- ดึงค่า Inset (ความสูงของแถบเมนูด้านบนของ Roblox) แบบอัตโนมัติ
-        local insetTopLeft, _ = GuiService:GetGuiInset()
-        
-        -- คำนวณจุดกึ่งกลางของปุ่ม X และ Y
-        local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
-        local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
-
-        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
-        task.wait(3.2)
-        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 1)
-    end
-end
-
 local function AutoAlignLane(gui)
-    if isAligning then return end
-    isAligning = true
     local Tolerance = 1.0 
-    
-    while gui and gui.Parent and gui.Enabled and (isUiEnabled or isGeneralRunEnabled) do
+    while gui and gui.Parent and gui.Enabled and isUiEnabled do
         local character = player.Character
         if not character then task.wait() continue end
 
@@ -162,17 +205,15 @@ local function AutoAlignLane(gui)
         end
         task.wait()
     end
-    
     ReleaseKey(Enum.KeyCode.A)
     ReleaseKey(Enum.KeyCode.D)
-    isAligning = false
 end
 
 local function HandleQTE(gui)
-    if not isUiEnabled and not isGeneralRunEnabled then return end
+    if not isUiEnabled then return end
     task.spawn(AutoAlignLane, gui)
 
-    while gui and gui.Parent and gui.Enabled and (isUiEnabled or isGeneralRunEnabled) do
+    while gui and gui.Parent and gui.Enabled and isUiEnabled do
         local hud = PlayerGui:FindFirstChild("HUD")
         if hud and hud.Enabled == true then hud.Enabled = false end
 
@@ -184,6 +225,7 @@ local function HandleQTE(gui)
             if topBarApp and topBarApp.Enabled == true then topBarApp.Enabled = false end
         end)
 
+        local foundButton = false
         for _, obj in ipairs(gui:GetDescendants()) do
             if obj:IsA("ImageButton") and obj.Visible and obj.AbsoluteSize.X > 0 then
                 GuiService.SelectedObject = obj
@@ -191,11 +233,12 @@ local function HandleQTE(gui)
                 PressEnter()
                 task.wait(0.05)
                 GuiService.SelectedObject = nil
-                break -- กดปุ่มเดียวแล้วรีสตาร์ทลูปหาปุ่มใหม่
+                foundButton = true
+                break
             end
         end
         
-        -- [แก้บักตรงนี้] เอาระบบ break ออกเมื่อหาปุ่มไม่เจอ เพื่อให้มันรอปุ่มถัดไปโผล่มา
+        if not foundButton or not gui.Enabled then break end
         task.wait(0.05) 
     end
     
@@ -213,34 +256,15 @@ local function HandleQTE(gui)
 end
 
 PlayerGui.ChildAdded:Connect(function(child)
-    if child.Name == "BifrostImageQTE" and (isUiEnabled or isGeneralRunEnabled) then
+    if child.Name == "BifrostImageQTE" and isUiEnabled then
         task.wait(0.1)
         task.spawn(HandleQTE, child)
     end
 end)
 
--- ==========================================
--- 5. ฟังก์ชันสำหรับโหมด "ออโต้ฟาร์มบอส"
--- ==========================================
-local function ActionChargeButton()
-    while not stopRaid and isUiEnabled do 
-        local inside, plot = isInAnyPlot()
-        if inside then
-            local character = player.Character or player.CharacterAdded:Wait()
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(tpTarget)
-                task.wait(0.3) 
-            end
-        end
-        SingleChargeAction()
-        task.wait(0.5)
-    end
-    charging = false
-end
-
 local function onTextChanged()
     if isLocked or not isUiEnabled then return end 
+    
     local currentText = txtTime.Text
     
     if string.find(currentText, "RAID AVAILABLE!") then
@@ -288,6 +312,13 @@ local function onTextChanged()
                 pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
             
+            -- [เพิ่มใหม่] กดเลข 0 แค่ 1 ครั้งต่อ 1 รอบรอ
+            task.spawn(function()
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Zero, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Zero, false, game)
+            end)
+            
             task.wait(0.5)
             isLocked = false
         end
@@ -297,87 +328,28 @@ end
 txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
 
 -- ==========================================
--- 6. ระบบวิ่งทั่วไป (General Run)
+-- 5. สร้างปุ่ม Toggle ในหน้า UI
 -- ==========================================
-local function StartGeneralRun()
-    while isGeneralRunEnabled do
-        local inside, plot = isInAnyPlot()
-        
-        if inside then
-            -- [สเตปที่ 1 & 2] อยู่ใน Plot: วาร์ปไปจุดชาร์จ และกดชาร์จ 3.2 วินาที
-            local character = player.Character or player.CharacterAdded:Wait()
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(tpTarget)
-                task.wait(0.3) 
-            end
-            
-            SingleChargeAction()
-            task.wait(0.2)
-        else
-            -- [สเตปที่ 3] อยู่นอก Plot (กำลังวิ่ง): ปล่อยให้ระบบ Auto Align กับ QTE ทำงาน
-            local runState = {Parent = player, Enabled = true}
-            
-            -- เปิดระบบจัดเลน
-            task.spawn(AutoAlignLane, runState)
-            
-            -- ดักเก็บ QTE กรณีที่มันค้างอยู่
-            local activeQTE = PlayerGui:FindFirstChild("BifrostImageQTE")
-            if activeQTE and activeQTE.Enabled then
-                task.spawn(HandleQTE, activeQTE)
-            end
 
-            -- ลูปรอจนกว่าจะวิ่งกลับเข้า Plot
-            while isGeneralRunEnabled and not isInAnyPlot() do
-                task.wait(0.5)
-            end
-            
-            -- กลับเข้า Plot แล้ว สั่งปิดระบบจัดเลนเพื่อเตรียมชาร์จใหม่
-            runState.Enabled = false
-        end
-
-        task.wait(0.5)
-    end
-end
-
--- ==========================================
--- 7. UI Toggles
--- ==========================================
 Tab:CreateToggle({
    Name = "ออโต้ฟาร์มบอส",
    CurrentValue = false,
    Flag = "AutoRaidToggle", 
    Callback = function(Value)
        isUiEnabled = Value 
+
        if isUiEnabled then
-           if isGeneralRunEnabled then isGeneralRunEnabled = false end 
            stopRaid = false
            onTextChanged() 
            if PlayerGui:FindFirstChild("BifrostImageQTE") then
                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
            end
-           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
+           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: เปิด", Duration = 2})
        else
            stopRaid = true
            charging = false
            lastAction = "" 
-           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
-       end
-   end,
-})
-
-Tab:CreateToggle({
-   Name = "ระบบวิ่งทั่วไป (ชาร์จ + เก็บ QTE)",
-   CurrentValue = false,
-   Flag = "GeneralRunToggle",
-   Callback = function(Value)
-       isGeneralRunEnabled = Value
-       if isGeneralRunEnabled then
-           if isUiEnabled then isUiEnabled = false; stopRaid = true; charging = false; lastAction = "" end
-           Rayfield:Notify({Title = "PlawanZ", Content = "General Run: ON", Duration = 2})
-           task.spawn(StartGeneralRun) 
-       else
-           Rayfield:Notify({Title = "PlawanZ", Content = "General Run: OFF", Duration = 2})
+           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: ปิด", Duration = 2})
        end
    end,
 })
@@ -388,10 +360,11 @@ Tab:CreateToggle({
    Flag = "AntiAfkToggle",
    Callback = function(Value)
        antiAfkEnabled = Value 
+
        if antiAfkEnabled then
-           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
+           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: เปิด", Duration = 2})
        else
-           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
+           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: ปิด", Duration = 2})
        end
    end,
 })
