@@ -314,9 +314,9 @@ local function onTextChanged()
             
             -- [เพิ่มใหม่] กดเลข 0 แค่ 1 ครั้งต่อ 1 รอบรอ
             task.spawn(function()
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Zero, false, game)
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
                 task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Zero, false, game)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
             end)
             
             task.wait(0.5)
