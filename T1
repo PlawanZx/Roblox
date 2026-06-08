@@ -4,9 +4,9 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "PlawanZ", -- เปลี่ยนชื่อ Hub ตรงนี้
-   LoadingTitle = "Loading PlawanZ...",
-   LoadingSubtitle = "by PlawanZ",
+   Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
+   LoadingTitle = "กำลังโหลดค้าบ...",
+   LoadingSubtitle = "by วาฬ",
    ConfigurationSaving = {
       Enabled = false,
    },
@@ -14,7 +14,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 local Tab = Window:CreateTab("ฟังชั่นหลัก", 4483362458) 
-local Section = Tab:CreateSection("Automation & Safety")
+local Section = Tab:CreateSection("ฟาร์มแบบมือถือระเบิด")
 
 -- ==========================================
 -- 2. ตัวแปรตั้งต้นจากสคริปต์ของคุณ
@@ -299,7 +299,7 @@ local function onTextChanged()
                 rootPart.CFrame = CFrame.new(tpTarget)
             end
 
-            if player.Name == "Pongtakan26" then
+            if player.Name == "Double_Aizx80" then
                 for i = 1, 10 do
                     pcall(function() event:InvokeServer("Pay", "100Sx") end)
                     task.wait(0.05)
@@ -333,12 +333,12 @@ Tab:CreateToggle({
            if PlayerGui:FindFirstChild("BifrostImageQTE") then
                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
            end
-           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
+           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: เปิด", Duration = 2})
        else
            stopRaid = true
            charging = false
            lastAction = "" 
-           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
+           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: ปิด", Duration = 2})
        end
    end,
 })
@@ -351,9 +351,9 @@ Tab:CreateToggle({
        antiAfkEnabled = Value 
 
        if antiAfkEnabled then
-           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
+           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: เปิด", Duration = 2})
        else
-           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
+           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: ปิด", Duration = 2})
        end
    end,
 })
