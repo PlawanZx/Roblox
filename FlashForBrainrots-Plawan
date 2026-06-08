@@ -1,3 +1,24 @@
+-- ==========================================
+-- 1. เรียกใช้งาน Rayfield UI Library
+-- ==========================================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "PlawanZ",
+   LoadingTitle = "Loading PlawanZ...",
+   LoadingSubtitle = "by PlawanZ",
+   ConfigurationSaving = {
+      Enabled = false,
+   },
+   KeySystem = false,
+})
+
+local Tab = Window:CreateTab("ฟังชั่นหลัก", 4483362458) 
+local Section = Tab:CreateSection("Automation & Safety")
+
+-- ==========================================
+-- 2. ตัวแปรตั้งต้น
+-- ==========================================
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -7,26 +28,37 @@ local CoreGui = game:GetService("CoreGui")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
-local txtTime = workspace.Map.Event_Objects.Storm_Breaker.Handle.ChargeBarGui.ChargeBarContainer.Txt_Time
-local event = ReplicatedStorage.Events.StormBreakerChargeFunction
+local txtTime = workspace:WaitForChild("Map"):WaitForChild("Event_Objects"):WaitForChild("Storm_Breaker"):WaitForChild("Handle"):WaitForChild("ChargeBarGui"):WaitForChild("ChargeBarContainer"):WaitForChild("Txt_Time")
+local event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("StormBreakerChargeFunction")
 
 local isLocked = false
 local lastAction = ""
-
 local stopRaid = false
 local charging = false
 
--- จุดที่ตั้งใจให้เป็นจุดปลอดภัย (Safe Zone)
+local isUiEnabled = false   
+local antiAfkEnabled = false 
+local isGeneralRunEnabled = false 
+local isAligning = false -- ป้องกันการจัดเลนซ้อนทับกัน
+
 local tpTarget = Vector3.new(4.511472702026367, 3.250000238418579, 14.231565475463867)
 
+-- ==========================================
+-- 3. ระบบ Anti-AFK
+-- ==========================================
 pcall(function()
     player.Idled:Connect(function()
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
-        task.wait(0.1)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+        if antiAfkEnabled then
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+            task.wait(0.1)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+        end
     end)
 end)
 
+-- ==========================================
+-- 4. ฟังก์ชันการทำงานพื้นฐาน
+-- ==========================================
 local function getModelBounds(model)
     if not model then return end
     return model:GetBoundingBox()
@@ -35,9 +67,7 @@ end
 local function isInPlot(plot, pos)
     local cf, size = getModelBounds(plot)
     if not cf then return false end
-
     local rel = cf:PointToObjectSpace(pos)
-
     return math.abs(rel.X) <= size.X/2
         and math.abs(rel.Y) <= size.Y/2
         and math.abs(rel.Z) <= size.Z/2
@@ -46,10 +76,8 @@ end
 local function isInAnyPlot()
     local char = player.Character
     if not char then return false end
-
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return false end
-
     local plotsFolder = workspace:FindFirstChild("Plots")
     if not plotsFolder then return false end
 
@@ -60,57 +88,7 @@ local function isInAnyPlot()
             end
         end
     end
-
     return false
-end
-
-local function ActionChargeButton()
-
-    while not stopRaid do
-        
-        local inside, plot = isInAnyPlot()
-        if inside then
-            local character = player.Character or player.CharacterAdded:Wait()
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(tpTarget)
-                task.wait(0.3) 
-            end
-        end
-
-        local dashInterface = player.PlayerGui:FindFirstChild("DashInterface")
-        local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
-
-        if button then
-
-            local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
-            local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + 36
-
-            VirtualInputManager:SendMouseButtonEvent(
-                posX,
-                posY,
-                0,
-                true,
-                game,
-                1
-            )
-
-            task.wait(3.2)
-
-            VirtualInputManager:SendMouseButtonEvent(
-                posX,
-                posY,
-                0,
-                false,
-                game,
-                1
-            )
-        end
-
-        task.wait(0.5)
-    end
-
-    charging = false
 end
 
 local function PressEnter()
@@ -127,10 +105,26 @@ local function ReleaseKey(key)
     VirtualInputManager:SendKeyEvent(false, key, false, game)
 end
 
+local function SingleChargeAction()
+    local dashInterface = player.PlayerGui:FindFirstChild("DashInterface")
+    local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
+
+    if button then
+        local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
+        local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + 36
+
+        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
+        task.wait(3.2)
+        VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 1)
+    end
+end
+
 local function AutoAlignLane(gui)
+    if isAligning then return end
+    isAligning = true
     local Tolerance = 1.0 
     
-    while gui and gui.Parent and gui.Enabled do
+    while gui and gui.Parent and gui.Enabled and (isUiEnabled or isGeneralRunEnabled) do
         local character = player.Character
         if not character then task.wait() continue end
 
@@ -167,54 +161,41 @@ local function AutoAlignLane(gui)
     
     ReleaseKey(Enum.KeyCode.A)
     ReleaseKey(Enum.KeyCode.D)
+    isAligning = false
 end
 
 local function HandleQTE(gui)
+    if not isUiEnabled and not isGeneralRunEnabled then return end
     task.spawn(AutoAlignLane, gui)
 
-    while gui and gui.Parent and gui.Enabled do
+    while gui and gui.Parent and gui.Enabled and (isUiEnabled or isGeneralRunEnabled) do
         local hud = PlayerGui:FindFirstChild("HUD")
-        if hud and hud.Enabled == true then
-            hud.Enabled = false
-        end
+        if hud and hud.Enabled == true then hud.Enabled = false end
 
         local topbarStandard = PlayerGui:FindFirstChild("TopbarStandard")
-        if topbarStandard and topbarStandard.Enabled == true then
-            topbarStandard.Enabled = false
-        end
+        if topbarStandard and topbarStandard.Enabled == true then topbarStandard.Enabled = false end
 
         pcall(function()
             local topBarApp = CoreGui:FindFirstChild("TopBarApp") and CoreGui.TopBarApp:FindFirstChild("TopBarApp")
-            if topBarApp and topBarApp.Enabled == true then
-                topBarApp.Enabled = false
-            end
+            if topBarApp and topBarApp.Enabled == true then topBarApp.Enabled = false end
         end)
-
-        local foundButton = false
 
         for _, obj in ipairs(gui:GetDescendants()) do
             if obj:IsA("ImageButton") and obj.Visible and obj.AbsoluteSize.X > 0 then
                 GuiService.SelectedObject = obj
                 task.wait(0.05)
-                
                 PressEnter()
                 task.wait(0.05)
-                
                 GuiService.SelectedObject = nil
-                foundButton = true
-                break
+                break -- กดปุ่มเดียวแล้วรีสตาร์ทลูปหาปุ่มใหม่
             end
         end
         
-        if not foundButton or not gui.Enabled then
-            break
-        end
-        
+        -- [แก้บักตรงนี้] เอาระบบ break ออกเมื่อหาปุ่มไม่เจอ เพื่อให้มันรอปุ่มถัดไปโผล่มา
         task.wait(0.05) 
     end
     
     GuiService.SelectedObject = nil
-    
     local hud = PlayerGui:FindFirstChild("HUD")
     if hud then hud.Enabled = true end
 
@@ -227,41 +208,52 @@ local function HandleQTE(gui)
     end)
 end
 
-if PlayerGui:FindFirstChild("BifrostImageQTE") then
-    task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
-end
-
 PlayerGui.ChildAdded:Connect(function(child)
-    if child.Name == "BifrostImageQTE" then
+    if child.Name == "BifrostImageQTE" and (isUiEnabled or isGeneralRunEnabled) then
         task.wait(0.1)
         task.spawn(HandleQTE, child)
     end
 end)
 
+-- ==========================================
+-- 5. ฟังก์ชันสำหรับโหมด "ออโต้ฟาร์มบอส"
+-- ==========================================
+local function ActionChargeButton()
+    while not stopRaid and isUiEnabled do 
+        local inside, plot = isInAnyPlot()
+        if inside then
+            local character = player.Character or player.CharacterAdded:Wait()
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                rootPart.CFrame = CFrame.new(tpTarget)
+                task.wait(0.3) 
+            end
+        end
+        SingleChargeAction()
+        task.wait(0.5)
+    end
+    charging = false
+end
+
 local function onTextChanged()
-    if isLocked then return end 
-    
+    if isLocked or not isUiEnabled then return end 
     local currentText = txtTime.Text
     
     if string.find(currentText, "RAID AVAILABLE!") then
         if lastAction ~= "เขียว" then
             isLocked = true
             lastAction = "เขียว"
-            
             task.wait(20) 
             
             local character = player.Character or player.CharacterAdded:Wait()
             local rootPart = character:WaitForChild("HumanoidRootPart")
             
             stopRaid = false
-
             rootPart.CFrame = CFrame.new(tpTarget)
-
             task.wait(0.3)
 
             if not charging then
                 charging = true
-
                 task.spawn(function()
                     ActionChargeButton()
                 end)
@@ -273,34 +265,23 @@ local function onTextChanged()
         
     elseif string.find(currentText, "Raid in") then
         if lastAction ~= "แดง" then
-
             isLocked = true
             lastAction = "แดง"
-
-            -- สั่งหยุดชาร์จ
             stopRaid = true
 
-            -- ==========================================
-            -- เพิ่มตรงนี้: ดึงตัวละครกลับมาจุดปลอดภัยทันทีเมื่อหยุดชาร์จ
-            -- ==========================================
             local character = player.Character or player.CharacterAdded:Wait()
             local rootPart = character:FindFirstChild("HumanoidRootPart")
             if rootPart then
                 rootPart.CFrame = CFrame.new(tpTarget)
             end
-            -- ==========================================
 
             if player.Name == "Pongtakan26" then
                 for i = 1, 10 do
-                    pcall(function()
-                        event:InvokeServer("Pay", "100Sx")
-                    end)
+                    pcall(function() event:InvokeServer("Pay", "100Sx") end)
                     task.wait(0.05)
                 end
             else
-                pcall(function()
-                    event:InvokeServer("Pay", "100Qi")
-                end)
+                pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
             
             task.wait(0.5)
@@ -310,4 +291,103 @@ local function onTextChanged()
 end
 
 txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
-onTextChanged()
+
+-- ==========================================
+-- 6. ระบบวิ่งทั่วไป (General Run)
+-- ==========================================
+local function StartGeneralRun()
+    while isGeneralRunEnabled do
+        local inside, plot = isInAnyPlot()
+        
+        if inside then
+            -- [สเตปที่ 1 & 2] อยู่ใน Plot: วาร์ปไปจุดชาร์จ และกดชาร์จ 3.2 วินาที
+            local character = player.Character or player.CharacterAdded:Wait()
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                rootPart.CFrame = CFrame.new(tpTarget)
+                task.wait(0.3) 
+            end
+            
+            SingleChargeAction()
+            task.wait(0.2)
+        else
+            -- [สเตปที่ 3] อยู่นอก Plot (กำลังวิ่ง): ปล่อยให้ระบบ Auto Align กับ QTE ทำงาน
+            local runState = {Parent = player, Enabled = true}
+            
+            -- เปิดระบบจัดเลน
+            task.spawn(AutoAlignLane, runState)
+            
+            -- ดักเก็บ QTE กรณีที่มันค้างอยู่
+            local activeQTE = PlayerGui:FindFirstChild("BifrostImageQTE")
+            if activeQTE and activeQTE.Enabled then
+                task.spawn(HandleQTE, activeQTE)
+            end
+
+            -- ลูปรอจนกว่าจะวิ่งกลับเข้า Plot
+            while isGeneralRunEnabled and not isInAnyPlot() do
+                task.wait(0.5)
+            end
+            
+            -- กลับเข้า Plot แล้ว สั่งปิดระบบจัดเลนเพื่อเตรียมชาร์จใหม่
+            runState.Enabled = false
+        end
+
+        task.wait(0.5)
+    end
+end
+
+-- ==========================================
+-- 7. UI Toggles
+-- ==========================================
+Tab:CreateToggle({
+   Name = "ออโต้ฟาร์มบอส",
+   CurrentValue = false,
+   Flag = "AutoRaidToggle", 
+   Callback = function(Value)
+        isUiEnabled = Value 
+        if isUiEnabled then
+            if isGeneralRunEnabled then isGeneralRunEnabled = false end 
+            stopRaid = false
+            onTextChanged() 
+            if PlayerGui:FindFirstChild("BifrostImageQTE") then
+                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
+            end
+            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
+        else
+            stopRaid = true
+            charging = false
+            lastAction = "" 
+            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
+        end
+   end,
+})
+
+Tab:CreateToggle({
+   Name = "ระบบวิ่งทั่วไป (ชาร์จ + เก็บ QTE)",
+   CurrentValue = false,
+   Flag = "GeneralRunToggle",
+   Callback = function(Value)
+        isGeneralRunEnabled = Value
+        if isGeneralRunEnabled then
+            if isUiEnabled then isUiEnabled = false; stopRaid = true; charging = false; lastAction = "" end
+            Rayfield:Notify({Title = "PlawanZ", Content = "General Run: ON", Duration = 2})
+            task.spawn(StartGeneralRun) 
+        else
+            Rayfield:Notify({Title = "PlawanZ", Content = "General Run: OFF", Duration = 2})
+        end
+   end,
+})
+
+Tab:CreateToggle({
+   Name = "Anti-AFK (กันหลุดเกม)",
+   CurrentValue = false,
+   Flag = "AntiAfkToggle",
+   Callback = function(Value)
+        antiAfkEnabled = Value 
+        if antiAfkEnabled then
+            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
+        else
+            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
+        end
+   end,
+})
