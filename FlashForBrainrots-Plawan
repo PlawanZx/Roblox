@@ -110,8 +110,12 @@ local function SingleChargeAction()
     local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
 
     if button then
+        -- ดึงค่า Inset (ความสูงของแถบเมนูด้านบนของ Roblox) แบบอัตโนมัติ
+        local insetTopLeft, _ = GuiService:GetGuiInset()
+        
+        -- คำนวณจุดกึ่งกลางของปุ่ม X และ Y
         local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
-        local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + 36
+        local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
 
         VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
         task.wait(3.2)
@@ -344,21 +348,21 @@ Tab:CreateToggle({
    CurrentValue = false,
    Flag = "AutoRaidToggle", 
    Callback = function(Value)
-        isUiEnabled = Value 
-        if isUiEnabled then
-            if isGeneralRunEnabled then isGeneralRunEnabled = false end 
-            stopRaid = false
-            onTextChanged() 
-            if PlayerGui:FindFirstChild("BifrostImageQTE") then
-                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
-            end
-            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
-        else
-            stopRaid = true
-            charging = false
-            lastAction = "" 
-            Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
-        end
+       isUiEnabled = Value 
+       if isUiEnabled then
+           if isGeneralRunEnabled then isGeneralRunEnabled = false end 
+           stopRaid = false
+           onTextChanged() 
+           if PlayerGui:FindFirstChild("BifrostImageQTE") then
+               task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
+           end
+           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: ON", Duration = 2})
+       else
+           stopRaid = true
+           charging = false
+           lastAction = "" 
+           Rayfield:Notify({Title = "PlawanZ", Content = "Auto Raid: OFF", Duration = 2})
+       end
    end,
 })
 
@@ -367,14 +371,14 @@ Tab:CreateToggle({
    CurrentValue = false,
    Flag = "GeneralRunToggle",
    Callback = function(Value)
-        isGeneralRunEnabled = Value
-        if isGeneralRunEnabled then
-            if isUiEnabled then isUiEnabled = false; stopRaid = true; charging = false; lastAction = "" end
-            Rayfield:Notify({Title = "PlawanZ", Content = "General Run: ON", Duration = 2})
-            task.spawn(StartGeneralRun) 
-        else
-            Rayfield:Notify({Title = "PlawanZ", Content = "General Run: OFF", Duration = 2})
-        end
+       isGeneralRunEnabled = Value
+       if isGeneralRunEnabled then
+           if isUiEnabled then isUiEnabled = false; stopRaid = true; charging = false; lastAction = "" end
+           Rayfield:Notify({Title = "PlawanZ", Content = "General Run: ON", Duration = 2})
+           task.spawn(StartGeneralRun) 
+       else
+           Rayfield:Notify({Title = "PlawanZ", Content = "General Run: OFF", Duration = 2})
+       end
    end,
 })
 
@@ -383,11 +387,11 @@ Tab:CreateToggle({
    CurrentValue = false,
    Flag = "AntiAfkToggle",
    Callback = function(Value)
-        antiAfkEnabled = Value 
-        if antiAfkEnabled then
-            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
-        else
-            Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
-        end
+       antiAfkEnabled = Value 
+       if antiAfkEnabled then
+           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: ON", Duration = 2})
+       else
+           Rayfield:Notify({Title = "PlawanZ", Content = "Anti-AFK: OFF", Duration = 2})
+       end
    end,
 })
