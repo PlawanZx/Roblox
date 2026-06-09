@@ -6,20 +6,20 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
    Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
    LoadingTitle = "กำลังโหลดค้าบ...",
-   LoadingSubtitle = "วาฬสุดหล่อทำเองเด้อ!",
+   LoadingSubtitle = "by วาฬ",
    ConfigurationSaving = {
       Enabled = false,
    },
    -- [เพิ่มระบบรหัสผ่านตรงนี้]
    KeySystem = true, -- เปิดใช้งาน Key System
    KeySettings = {
-      Title = "ใส่รัหสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
+      Title = "ใส่รหัสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
       Subtitle = "กรุณาใส่รหัสผ่านเพื่อเข้าใช้งานครับเสี่ย",
       Note = "ไม่มีรหัสก็ อดค้าบ !", -- ข้อความใบ้รหัสผ่าน
       FileName = "WhaleHubKey", -- ชื่อไฟล์สำหรับเซฟรหัสผ่านในโฟลเดอร์ workspace
-      SaveKey = true, -- ตรวจสอบว่าเคยใส่รหัสผ่านไปแล้วหรือยัง (ครั้งหน้าจะได้ไม่ต้องใส่ใหม่)
+      SaveKey = false, -- ตรวจสอบว่าเคยใส่รหัสผ่านไปแล้วหรือยัง (ครั้งหน้าจะได้ไม่ต้องใส่ใหม่)
       GrabKeyFromSite = false, -- ถ้ามีเว็บแจกคีย์ให้ปรับเป็น true
-      Key = {"1"} -- ตั้งรหัสผ่านที่ต้องการตรงนี้ (สามารถใส่หลายคีย์ได้ เช่น {"Key1", "Key2"})
+      Key = {"1234"} -- ตั้งรหัสผ่านที่ต้องการตรงนี้ (สามารถใส่หลายคีย์ได้ เช่น {"Key1", "Key2"})
    }
 })
 
@@ -311,6 +311,11 @@ local function onTextChanged()
             else
                 pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
+            
+            task.wait(0.5)
+            isLocked = false
+        end
+    end
 end
 
 txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
