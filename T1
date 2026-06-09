@@ -311,18 +311,6 @@ local function onTextChanged()
             else
                 pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
-            
-            -- [แก้ไข] เปลี่ยนมากดเลข 1 แค่ 1 ครั้งต่อรอบรอ
-            task.spawn(function()
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
-            end)
-            
-            task.wait(0.5)
-            isLocked = false
-        end
-    end
 end
 
 txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
