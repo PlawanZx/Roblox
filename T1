@@ -6,11 +6,21 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
    Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
    LoadingTitle = "กำลังโหลดค้าบ...",
-   LoadingSubtitle = "by วาฬ",
+   LoadingSubtitle = "วาฬสุดหล่อทำเองเด้อ!",
    ConfigurationSaving = {
       Enabled = false,
    },
-   KeySystem = false,
+   -- [เพิ่มระบบรหัสผ่านตรงนี้]
+   KeySystem = true, -- เปิดใช้งาน Key System
+   KeySettings = {
+      Title = "ใส่รัหสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
+      Subtitle = "กรุณาใส่รหัสผ่านเพื่อเข้าใช้งานครับเสี่ย",
+      Note = "ไม่มีรหัสก็ อดค้าบ !", -- ข้อความใบ้รหัสผ่าน
+      FileName = "WhaleHubKey", -- ชื่อไฟล์สำหรับเซฟรหัสผ่านในโฟลเดอร์ workspace
+      SaveKey = true, -- ตรวจสอบว่าเคยใส่รหัสผ่านไปแล้วหรือยัง (ครั้งหน้าจะได้ไม่ต้องใส่ใหม่)
+      GrabKeyFromSite = false, -- ถ้ามีเว็บแจกคีย์ให้ปรับเป็น true
+      Key = {""} -- ตั้งรหัสผ่านที่ต้องการตรงนี้ (สามารถใส่หลายคีย์ได้ เช่น {"Key1", "Key2"})
+   }
 })
 
 local Tab = Window:CreateTab("ฟังชั่นหลัก", 4483362458) 
@@ -22,7 +32,7 @@ local Section = Tab:CreateSection("ฟาร์มแบบมือถือร
 local Players = game:GetService("Players")
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local VirtualUser = game:GetService("VirtualUser") -- [เพิ่มตัวแปร VirtualUser สำหรับมือถือ]
+local VirtualUser = game:GetService("VirtualUser") 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 
@@ -108,15 +118,12 @@ local function ActionChargeButton()
         local button = dashInterface and dashInterface:FindFirstChild("ChargeButton")
 
         if button then
-            -- คำนวณจุดกึ่งกลางของปุ่ม (รองรับทั้งมือถือและคอม)
             local insetTopLeft, _ = GuiService:GetGuiInset()
             local posX = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
             local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
 
-            -- 1. สั่งจำลองการกดเมาส์/ทัชสกรีน ลงบนจอตรงตำแหน่งปุ่ม (สำคัญสำหรับเกมที่เช็ค Input กายภาพ)
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
             
-            -- 2. สั่งยิง Event เสริมเข้าไปเพื่อความชัวร์ (เผื่อ VirtualInput ขัดข้องในมือถือ)
             pcall(function()
                 if getconnections then
                     for _, conn in pairs(getconnections(button.MouseButton1Down)) do conn:Fire() end
@@ -128,13 +135,10 @@ local function ActionChargeButton()
                 end
             end)
 
-            -- กดค้างไว้ 3.2 วินาที ตามที่สคริปต์เดิมตั้งไว้
             task.wait(3.2)
 
-            -- 3. สั่งปล่อยการกดเมาส์/ทัชสกรีน
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 1)
             
-            -- 4. ยิง Event ยกเลิกการกด
             pcall(function()
                 if getconnections then
                     for _, conn in pairs(getconnections(button.MouseButton1Up)) do conn:Fire() end
@@ -299,7 +303,7 @@ local function onTextChanged()
                 rootPart.CFrame = CFrame.new(tpTarget)
             end
 
-            if player.Name == "Pongtakan26" then
+            if player.Name == "Rlyzer" then
                 for i = 1, 10 do
                     pcall(function() event:InvokeServer("Pay", "100Sx") end)
                     task.wait(0.05)
@@ -307,6 +311,13 @@ local function onTextChanged()
             else
                 pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
+            
+            -- [แก้ไข] เปลี่ยนมากดเลข 1 แค่ 1 ครั้งต่อรอบรอ
+            task.spawn(function()
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
+            end)
             
             task.wait(0.5)
             isLocked = false
