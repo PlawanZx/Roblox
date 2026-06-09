@@ -6,14 +6,14 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
    Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
    LoadingTitle = "กำลังโหลดค้าบ...",
-   LoadingSubtitle = "by วาฬ",
+   LoadingSubtitle = "วาฬสุดหล่อทำเองเด้อ!",
    ConfigurationSaving = {
       Enabled = false,
    },
    -- [เพิ่มระบบรหัสผ่านตรงนี้]
    KeySystem = true, -- เปิดใช้งาน Key System
    KeySettings = {
-      Title = "ใส่รัหสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
+      Title = "ใส่รหัสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
       Subtitle = "กรุณาใส่รหัสผ่านเพื่อเข้าใช้งานครับเสี่ย",
       Note = "ไม่มีรหัสก็ อดค้าบ !", -- ข้อความใบ้รหัสผ่าน
       FileName = "WhaleHubKey", -- ชื่อไฟล์สำหรับเซฟรหัสผ่านในโฟลเดอร์ workspace
@@ -312,7 +312,7 @@ local function onTextChanged()
                 pcall(function() event:InvokeServer("Pay", "100Qi") end)
             end
             
-            -- [เพิ่มใหม่] กดเลข 0 แค่ 1 ครั้งต่อ 1 รอบรอ
+            -- [แก้ไข] เปลี่ยนมากดเลข 1 แค่ 1 ครั้งต่อรอบรอ
             task.spawn(function()
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
                 task.wait(0.05)
