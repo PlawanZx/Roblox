@@ -303,7 +303,7 @@ local function onTextChanged()
                 rootPart.CFrame = CFrame.new(tpTarget)
             end
 
-            if player.Name == "Rlyzer" then
+            if player.Name == "Double_Aizx" then
                 for i = 1, 10 do
                     pcall(function() event:InvokeServer("Pay", "100Sx") end)
                     task.wait(0.05)
