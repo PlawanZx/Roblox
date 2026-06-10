@@ -1,47 +1,140 @@
 -- ==========================================
--- 1. เรียกใช้งาน Rayfield UI Library
+-- 1. สร้าง UI แบบเบาสุดๆ (Native UI) 
 -- ==========================================
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
-   Name = "วาฬสุดหล่อ", -- เปลี่ยนชื่อ Hub ตรงนี้
-   LoadingTitle = "กำลังโหลดค้าบ...",
-   LoadingSubtitle = "by วาฬ",
-   ConfigurationSaving = {
-      Enabled = false,
-   },
-   -- [เพิ่มระบบรหัสผ่านตรงนี้]
-   KeySystem = true, -- เปิดใช้งาน Key System
-   KeySettings = {
-      Title = "ใส่รหัสครับผมสุดหล่อ| จากวาฬสุดหล่อ",
-      Subtitle = "กรุณาใส่รหัสผ่านเพื่อเข้าใช้งานครับเสี่ย",
-      Note = "ไม่มีรหัสก็ อดค้าบ !", -- ข้อความใบ้รหัสผ่าน
-      FileName = "WhaleHubKey", -- ชื่อไฟล์สำหรับเซฟรหัสผ่านในโฟลเดอร์ workspace
-      SaveKey = true, -- ตรวจสอบว่าเคยใส่รหัสผ่านไปแล้วหรือยัง (ครั้งหน้าจะได้ไม่ต้องใส่ใหม่)
-      GrabKeyFromSite = false, -- ถ้ามีเว็บแจกคีย์ให้ปรับเป็น true
-      Key = {"1234"} -- ตั้งรหัสผ่านที่ต้องการตรงนี้ (สามารถใส่หลายคีย์ได้ เช่น {"Key1", "Key2"})
-   }
-})
-
-local Tab = Window:CreateTab("ฟังชั่นหลัก", 4483362458) 
-local Section = Tab:CreateSection("ฟาร์มแบบมือถือระเบิด")
-
--- ==========================================
--- 2. ตัวแปรตั้งต้นจากสคริปต์ของคุณ
--- ==========================================
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- ลบ UI เก่าออกถ้ามี (กันบัคเวลารันซ้ำ)
+if CoreGui:FindFirstChild("WhaleLiteUI") then
+    CoreGui.WhaleLiteUI:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "WhaleLiteUI"
+ScreenGui.Parent = CoreGui
+
+-- ==========================================
+-- ส่วนที่ 1.1: หน้าต่างใส่รหัสผ่าน (Key System)
+-- ==========================================
+local KeyFrame = Instance.new("Frame")
+KeyFrame.Size = UDim2.new(0, 250, 0, 150)
+KeyFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+KeyFrame.BorderSizePixel = 0
+KeyFrame.Parent = ScreenGui
+
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+KeyTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+KeyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyTitle.Text = "วาฬสุดหล่อ | ใส่รหัส"
+KeyTitle.Font = Enum.Font.GothamBold
+KeyTitle.TextSize = 16
+KeyTitle.BorderSizePixel = 0
+KeyTitle.Parent = KeyFrame
+
+local KeyInput = Instance.new("TextBox")
+KeyInput.Size = UDim2.new(0.8, 0, 0, 35)
+KeyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
+KeyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInput.PlaceholderText = "ใส่รหัสผ่านตรงนี้..."
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.TextSize = 14
+KeyInput.Parent = KeyFrame
+
+local KeySubmit = Instance.new("TextButton")
+KeySubmit.Size = UDim2.new(0.8, 0, 0, 35)
+KeySubmit.Position = UDim2.new(0.1, 0, 0.7, 0)
+KeySubmit.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+KeySubmit.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeySubmit.Text = "เข้าสู่ระบบ"
+KeySubmit.Font = Enum.Font.GothamBold
+KeySubmit.TextSize = 14
+KeySubmit.Parent = KeyFrame
+
+-- ==========================================
+-- ส่วนที่ 1.2: หน้าต่างหลัก (Main Hub)
+-- ==========================================
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 160)
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -80)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Visible = false -- ซ่อนไว้ก่อนจนกว่าจะใส่รหัสถูก
+MainFrame.Parent = ScreenGui
+
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Size = UDim2.new(1, 0, 0, 40)
+MainTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainTitle.Text = "วาฬสุดหล่อ Lite"
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.TextSize = 16
+MainTitle.BorderSizePixel = 0
+MainTitle.Parent = MainFrame
+
+local AutoRaidBtn = Instance.new("TextButton")
+AutoRaidBtn.Size = UDim2.new(0.9, 0, 0, 40)
+AutoRaidBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
+AutoRaidBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+AutoRaidBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoRaidBtn.Text = "ออโต้ฟาร์มบอส: ปิด"
+AutoRaidBtn.Font = Enum.Font.GothamBold
+AutoRaidBtn.TextSize = 14
+AutoRaidBtn.Parent = MainFrame
+
+local AntiAfkBtn = Instance.new("TextButton")
+AntiAfkBtn.Size = UDim2.new(0.9, 0, 0, 40)
+AntiAfkBtn.Position = UDim2.new(0.05, 0, 0.65, 0)
+AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+AntiAfkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiAfkBtn.Text = "กันหลุด: ปิด"
+AntiAfkBtn.Font = Enum.Font.GothamBold
+AntiAfkBtn.TextSize = 14
+AntiAfkBtn.Parent = MainFrame
+
+-- ทำให้ลาก UI ได้ทั้งหน้า Key และหน้า Main
+local function MakeDraggable(frame, titleBar)
+    local dragging, dragInput, dragStart, startPos
+    titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+    titleBar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if dragging and dragInput then
+            local delta = dragInput.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+MakeDraggable(KeyFrame, KeyTitle)
+MakeDraggable(MainFrame, MainTitle)
+
+-- ==========================================
+-- 2. ตัวแปรตั้งต้นและการตั้งค่า
+-- ==========================================
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local VirtualUser = game:GetService("VirtualUser") 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CoreGui = game:GetService("CoreGui")
-
-local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- รอให้โหลด Map ให้เสร็จก่อน
-local txtTime = workspace:WaitForChild("Map"):WaitForChild("Event_Objects"):WaitForChild("Storm_Breaker"):WaitForChild("Handle"):WaitForChild("ChargeBarGui"):WaitForChild("ChargeBarContainer"):WaitForChild("Txt_Time")
-local event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("StormBreakerChargeFunction")
+local ValidKey = "1234" -- ตั้งรหัสตรงนี้
 
 local isLocked = false
 local lastAction = ""
@@ -51,11 +144,21 @@ local charging = false
 local isUiEnabled = false   
 local antiAfkEnabled = false 
 
--- จุดที่ตั้งใจให้เป็นจุดปลอดภัย (Safe Zone)
 local tpTarget = Vector3.new(4.511472702026367, 3.250000238418579, 14.231565475463867)
 
+-- ระบบเข้าสู่ระบบ
+KeySubmit.MouseButton1Click:Connect(function()
+    if KeyInput.Text == ValidKey then
+        KeyFrame:Destroy()
+        MainFrame.Visible = true
+    else
+        KeyInput.Text = ""
+        KeyInput.PlaceholderText = "รหัสผิด! ลองใหม่"
+    end
+end)
+
 -- ==========================================
--- 3. ระบบ Anti-AFK แบบแยก Toggle
+-- 3. ระบบ Anti-AFK
 -- ==========================================
 pcall(function()
     player.Idled:Connect(function()
@@ -68,7 +171,7 @@ pcall(function()
 end)
 
 -- ==========================================
--- 4. ฟังก์ชันการทำงานอื่นๆ 
+-- 4. ฟังก์ชันการทำงานหลัก (Logic เดิมของคุณ 100%)
 -- ==========================================
 local function getModelBounds(model)
     if not model then return end
@@ -79,9 +182,7 @@ local function isInPlot(plot, pos)
     local cf, size = getModelBounds(plot)
     if not cf then return false end
     local rel = cf:PointToObjectSpace(pos)
-    return math.abs(rel.X) <= size.X/2
-        and math.abs(rel.Y) <= size.Y/2
-        and math.abs(rel.Z) <= size.Z/2
+    return math.abs(rel.X) <= size.X/2 and math.abs(rel.Y) <= size.Y/2 and math.abs(rel.Z) <= size.Z/2
 end
 
 local function isInAnyPlot()
@@ -93,10 +194,8 @@ local function isInAnyPlot()
     if not plotsFolder then return false end
 
     for _, plot in pairs(plotsFolder:GetChildren()) do
-        if plot:IsA("Model") then
-            if isInPlot(plot, hrp.Position) then
-                return true, plot
-            end
+        if plot:IsA("Model") and isInPlot(plot, hrp.Position) then
+            return true, plot
         end
     end
     return false
@@ -123,7 +222,6 @@ local function ActionChargeButton()
             local posY = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + insetTopLeft.Y
 
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, true, game, 1)
-            
             pcall(function()
                 if getconnections then
                     for _, conn in pairs(getconnections(button.MouseButton1Down)) do conn:Fire() end
@@ -138,7 +236,6 @@ local function ActionChargeButton()
             task.wait(3.2)
 
             VirtualInputManager:SendMouseButtonEvent(posX, posY, 0, false, game, 1)
-            
             pcall(function()
                 if getconnections then
                     for _, conn in pairs(getconnections(button.MouseButton1Up)) do conn:Fire() end
@@ -161,20 +258,14 @@ local function PressEnter()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
 end
 
-local function HoldKey(key)
-    VirtualInputManager:SendKeyEvent(true, key, false, game)
-end
-
-local function ReleaseKey(key)
-    VirtualInputManager:SendKeyEvent(false, key, false, game)
-end
+local function HoldKey(key) VirtualInputManager:SendKeyEvent(true, key, false, game) end
+local function ReleaseKey(key) VirtualInputManager:SendKeyEvent(false, key, false, game) end
 
 local function AutoAlignLane(gui)
     local Tolerance = 1.0 
     while gui and gui.Parent and gui.Enabled and isUiEnabled do
         local character = player.Character
         if not character then task.wait() continue end
-
         local hrp = character:FindFirstChild("HumanoidRootPart")
         if not hrp then task.wait() continue end
 
@@ -237,7 +328,6 @@ local function HandleQTE(gui)
                 break
             end
         end
-        
         if not foundButton or not gui.Enabled then break end
         task.wait(0.05) 
     end
@@ -262,102 +352,6 @@ PlayerGui.ChildAdded:Connect(function(child)
     end
 end)
 
-local function onTextChanged()
-    if isLocked or not isUiEnabled then return end 
-    
-    local currentText = txtTime.Text
-    
-    if string.find(currentText, "RAID AVAILABLE!") then
-        if lastAction ~= "เขียว" then
-            isLocked = true
-            lastAction = "เขียว"
-            task.wait(20) 
-            
-            local character = player.Character or player.CharacterAdded:Wait()
-            local rootPart = character:WaitForChild("HumanoidRootPart")
-            
-            stopRaid = false
-            rootPart.CFrame = CFrame.new(tpTarget)
-            task.wait(0.3)
-
-            if not charging then
-                charging = true
-                task.spawn(function()
-                    ActionChargeButton()
-                end)
-            end
-
-            task.wait(0.5)
-            isLocked = false
-        end
-        
-    elseif string.find(currentText, "Raid in") then
-        if lastAction ~= "แดง" then
-            isLocked = true
-            lastAction = "แดง"
-            stopRaid = true
-
-            local character = player.Character or player.CharacterAdded:Wait()
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                rootPart.CFrame = CFrame.new(tpTarget)
-            end
-
-            if player.Name == "Rlyzer" then
-                for i = 1, 10 do
-                    pcall(function() event:InvokeServer("Pay", "100Sx") end)
-                    task.wait(0.05)
-                end
-            else
-                pcall(function() event:InvokeServer("Pay", "100Qi") end)
-            end
-            
-            task.wait(0.5)
-            isLocked = false
-        end
-    end
-end
-
-txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
-
--- ==========================================
--- 5. สร้างปุ่ม Toggle ในหน้า UI
--- ==========================================
-
-Tab:CreateToggle({
-   Name = "ออโต้ฟาร์มบอส",
-   CurrentValue = false,
-   Flag = "AutoRaidToggle", 
-   Callback = function(Value)
-       isUiEnabled = Value 
-
-       if isUiEnabled then
-           stopRaid = false
-           onTextChanged() 
-           if PlayerGui:FindFirstChild("BifrostImageQTE") then
-               task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
-           end
-           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: เปิด", Duration = 2})
-       else
-           stopRaid = true
-           charging = false
-           lastAction = "" 
-           Rayfield:Notify({Title = "PlawanZ", Content = "ตีบอสออโต้: ปิด", Duration = 2})
-       end
-   end,
-})
-
-Tab:CreateToggle({
-   Name = "Anti-AFK (กันหลุดเกม)",
-   CurrentValue = false,
-   Flag = "AntiAfkToggle",
-   Callback = function(Value)
-       antiAfkEnabled = Value 
-
-       if antiAfkEnabled then
-           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: เปิด", Duration = 2})
-       else
-           Rayfield:Notify({Title = "วาฬ", Content = "กันหลุด: ปิด", Duration = 2})
-       end
-   end,
-})
+-- โหลดค่าพื้นหลังเพื่อไม่ให้ UI ค้าง
+task.spawn(function()
+    local txt
