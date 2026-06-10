@@ -15,6 +15,61 @@ ScreenGui.Name = "WhaleLiteUI"
 ScreenGui.Parent = CoreGui
 
 -- ==========================================
+-- ระบบการแจ้งเตือน (Custom Notification System) - เบาสุดๆ
+-- ==========================================
+local function Notify(title, message, duration)
+    duration = duration or 2
+    local NotificationFrame = Instance.new("Frame")
+    NotificationFrame.Size = UDim2.new(0, 220, 0, 60)
+    -- เริ่มต้นจากนอกจอฝั่งขวา
+    NotificationFrame.Position = UDim2.new(1, 10, 0.85, 0)
+    NotificationFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    NotificationFrame.BorderSizePixel = 0
+    NotificationFrame.Parent = ScreenGui
+
+    -- เส้นขอบสีฟ้าเท่ๆ ด้านข้างกิ๊บเก๋
+    local SideBar = Instance.new("Frame")
+    SideBar.Size = UDim2.new(0, 4, 1, 0)
+    SideBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    SideBar.BorderSizePixel = 0
+    SideBar.Parent = NotificationFrame
+
+    local NotifTitle = Instance.new("TextLabel")
+    NotifTitle.Size = UDim2.new(1, -15, 0, 25)
+    NotifTitle.Position = UDim2.new(0, 10, 0, 3)
+    NotifTitle.BackgroundTransparency = 1
+    NotifTitle.Text = title
+    NotifTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+    NotifTitle.Font = Enum.Font.GothamBold
+    NotifTitle.TextSize = 13
+    NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    NotifTitle.Parent = NotificationFrame
+
+    local NotifMsg = Instance.new("TextLabel")
+    NotifMsg.Size = UDim2.new(1, -15, 0, 25)
+    NotifMsg.Position = UDim2.new(0, 10, 0, 25)
+    NotifMsg.BackgroundTransparency = 1
+    NotifMsg.Text = message
+    NotifMsg.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NotifMsg.Font = Enum.Font.Gotham
+    NotifMsg.TextSize = 12
+    NotifMsg.TextXAlignment = Enum.TextXAlignment.Left
+    NotifMsg.Parent = NotificationFrame
+
+    -- แอนิเมชันเลื่อนเข้า
+    NotificationFrame:TweenPosition(UDim2.new(1, -230, 0.85, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
+    
+    task.delay(duration, function()
+        if NotificationFrame and NotificationFrame.Parent then
+            -- แอนิเมชันเลื่อนออก
+            NotificationFrame:TweenPosition(UDim2.new(1, 10, 0.85, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quart, 0.3, true)
+            task.wait(0.3)
+            NotificationFrame:Destroy()
+        end
+    end)
+end
+
+-- ==========================================
 -- ส่วนที่ 1.1: หน้าต่างใส่รหัสผ่าน (Key System)
 -- ==========================================
 local KeyFrame = Instance.new("Frame")
@@ -69,7 +124,7 @@ local MainTitle = Instance.new("TextLabel")
 MainTitle.Size = UDim2.new(1, 0, 0, 40)
 MainTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-MainTitle.Text = "วาฬสุดหล่อ Lite"
+MainTitle.Text = "วาฬสุดหล่อ UI"
 MainTitle.Font = Enum.Font.GothamBold
 MainTitle.TextSize = 16
 MainTitle.BorderSizePixel = 0
@@ -151,9 +206,11 @@ KeySubmit.MouseButton1Click:Connect(function()
     if KeyInput.Text == ValidKey then
         KeyFrame:Destroy()
         MainFrame.Visible = true
+        Notify("PlawanZ", "ยินดีต้อนรับเข้าสู่ระบบครับเสี่ย!", 2.5)
     else
         KeyInput.Text = ""
         KeyInput.PlaceholderText = "รหัสผิด! ลองใหม่"
+        Notify("PlawanZ", "รหัสผ่านไม่ถูกต้อง อดค้าบ!", 2)
     end
 end)
 
@@ -354,4 +411,95 @@ end)
 
 -- โหลดค่าพื้นหลังเพื่อไม่ให้ UI ค้าง
 task.spawn(function()
-    local txt
+    local txtTime = workspace:WaitForChild("Map"):WaitForChild("Event_Objects"):WaitForChild("Storm_Breaker"):WaitForChild("Handle"):WaitForChild("ChargeBarGui"):WaitForChild("ChargeBarContainer"):WaitForChild("Txt_Time")
+    local event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("StormBreakerChargeFunction")
+
+    local function onTextChanged()
+        if isLocked or not isUiEnabled then return end 
+        local currentText = txtTime.Text
+        
+        if string.find(currentText, "RAID AVAILABLE!") then
+            if lastAction ~= "เขียว" then
+                isLocked = true
+                lastAction = "เขียว"
+                task.wait(20) 
+                
+                local character = player.Character or player.CharacterAdded:Wait()
+                local rootPart = character:WaitForChild("HumanoidRootPart")
+                
+                stopRaid = false
+                rootPart.CFrame = CFrame.new(tpTarget)
+                task.wait(0.3)
+
+                if not charging then
+                    charging = true
+                    task.spawn(ActionChargeButton)
+                end
+
+                task.wait(0.5)
+                isLocked = false
+            end
+            
+        elseif string.find(currentText, "Raid in") then
+            if lastAction ~= "แดง" then
+                isLocked = true
+                lastAction = "แดง"
+                stopRaid = true
+
+                local character = player.Character or player.CharacterAdded:Wait()
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then rootPart.CFrame = CFrame.new(tpTarget) end
+
+                if player.Name == "Rlyzer" then
+                    for i = 1, 10 do
+                        pcall(function() event:InvokeServer("Pay", "100Sx") end)
+                        task.wait(0.05)
+                    end
+                else
+                    pcall(function() event:InvokeServer("Pay", "100Qi") end)
+                end
+                
+                task.wait(0.5)
+                isLocked = false
+            end
+        end
+    end
+
+    txtTime:GetPropertyChangedSignal("Text"):Connect(onTextChanged)
+
+    -- เชื่อมปุ่ม Toggle และใส่การแจ้งเตือนตอนกด
+    AutoRaidBtn.MouseButton1Click:Connect(function()
+        isUiEnabled = not isUiEnabled
+        if isUiEnabled then
+            AutoRaidBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50) -- สีเขียว
+            AutoRaidBtn.Text = "ออโต้ฟาร์มบอส: เปิด"
+            Notify("PlawanZ", "ตีบอสออโต้: เปิดใช้งานแล้ว", 2)
+            stopRaid = false
+            onTextChanged() 
+            if PlayerGui:FindFirstChild("BifrostImageQTE") then
+                task.spawn(HandleQTE, PlayerGui.BifrostImageQTE)
+            end
+        else
+            AutoRaidBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50) -- สีแดง
+            AutoRaidBtn.Text = "ออโต้ฟาร์มบอส: ปิด"
+            Notify("PlawanZ", "ตีบอสออโต้: ปิดการใช้งาน", 2)
+            stopRaid = true
+            charging = false
+            lastAction = "" 
+        end
+    end)
+end)
+
+-- ปุ่ม Anti-AFK และใส่การแจ้งเตือนตอนกด
+AntiAfkBtn.MouseButton1Click:Connect(function()
+    antiAfkEnabled = not antiAfkEnabled
+    if antiAfkEnabled then
+        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50) -- สีเขียว
+        AntiAfkBtn.Text = "กันหลุด: เปิด"
+        Notify("วาฬ", "ระบบกันหลุดเกม: เปิดใช้งานแล้ว", 2)
+    else
+        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50) -- สีแดง
+        AntiAfkBtn.Text = "กันหลุด: ปิด"
+        Notify("วาฬ", "ระบบกันหลุดเกม: ปิดการใช้งาน", 2)
+    end
+end)
