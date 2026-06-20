@@ -126,6 +126,18 @@ MainTitle.TextSize = 16
 MainTitle.BorderSizePixel = 0
 MainTitle.Parent = MainFrame
 
+-- ปุ่ม Minimize (ย่อ/ขยาย)
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -35, 0, 5)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.Text = "-"
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.TextSize = 18
+MinimizeBtn.BorderSizePixel = 0
+MinimizeBtn.Parent = MainTitle
+
 local AutoRaidBtn = Instance.new("TextButton")
 AutoRaidBtn.Size = UDim2.new(0.9, 0, 0, 35)
 AutoRaidBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -140,11 +152,21 @@ AutoRaidBtn.Parent = MainFrame
 local PayModeBtn = Instance.new("TextButton")
 PayModeBtn.Size = UDim2.new(0.9, 0, 0, 35)
 PayModeBtn.Position = UDim2.new(0.05, 0, 0.48, 0)
-PayModeBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150) -- สีฟ้าเข้ม
+PayModeBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
 PayModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 PayModeBtn.Font = Enum.Font.GothamBold
 PayModeBtn.TextSize = 13
 PayModeBtn.Parent = MainFrame
+
+local AntiAfkBtn = Instance.new("TextButton")
+AntiAfkBtn.Size = UDim2.new(0.9, 0, 0, 35)
+AntiAfkBtn.Position = UDim2.new(0.05, 0, 0.72, 0)
+AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+AntiAfkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AntiAfkBtn.Text = "กันหลุด: ปิด"
+AntiAfkBtn.Font = Enum.Font.GothamBold
+AntiAfkBtn.TextSize = 14
+AntiAfkBtn.Parent = MainFrame
 
 -- ตัวเลือกโหมดการจ่ายเงิน
 local payModes = {
@@ -164,15 +186,30 @@ PayModeBtn.MouseButton1Click:Connect(function()
     PayModeBtn.Text = payModes[currentPayModeIndex].name
 end)
 
-local AntiAfkBtn = Instance.new("TextButton")
-AntiAfkBtn.Size = UDim2.new(0.9, 0, 0, 35)
-AntiAfkBtn.Position = UDim2.new(0.05, 0, 0.72, 0)
-AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-AntiAfkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AntiAfkBtn.Text = "กันหลุด: ปิด"
-AntiAfkBtn.Font = Enum.Font.GothamBold
-AntiAfkBtn.TextSize = 14
-AntiAfkBtn.Parent = MainFrame
+-- ระบบ ย่อ/ขยาย ที่แก้ไขใหม่ (ปิดการมองเห็นปุ่มทั้งหมดแทน)
+local isMinimized = false
+MinimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        -- ซ่อนปุ่มทั้งหมด
+        AutoRaidBtn.Visible = false
+        PayModeBtn.Visible = false
+        AntiAfkBtn.Visible = false
+        
+        -- ปรับขนาดกรอบให้เหลือแค่หัวข้อ
+        MainFrame.Size = UDim2.new(0, 200, 0, 40)
+        MinimizeBtn.Text = "+"
+    else
+        -- แสดงปุ่มกลับมา
+        AutoRaidBtn.Visible = true
+        PayModeBtn.Visible = true
+        AntiAfkBtn.Visible = true
+        
+        -- คืนขนาดกรอบกลับเท่าเดิม
+        MainFrame.Size = UDim2.new(0, 200, 0, 210)
+        MinimizeBtn.Text = "-"
+    end
+end)
 
 -- ทำให้ลาก UI ได้
 local function MakeDraggable(frame, titleBar)
