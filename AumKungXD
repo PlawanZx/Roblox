@@ -305,7 +305,7 @@ local function onTextChanged()
 
             if player.Name == "begvjildm26334" then
                 for i = 1, 10 do
-                    pcall(function() event:InvokeServer("Pay", "100Sp") end)
+                    pcall(function() event:InvokeServer("Pay", "100Sx") end)
                     task.wait(0.05)
                 end
             else
