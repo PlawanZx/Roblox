@@ -9,10 +9,22 @@ local player = Players.LocalPlayer
 if CoreGui:FindFirstChild("WhaleLiteUI") then
     CoreGui.WhaleLiteUI:Destroy()
 end
+if CoreGui:FindFirstChild("WhaleBlackScreenUI") then
+    CoreGui.WhaleBlackScreenUI:Destroy()
+end
 
+-- ScreenGui หลักสำหรับเมนู
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WhaleLiteUI"
+ScreenGui.DisplayOrder = 100
 ScreenGui.Parent = CoreGui
+
+-- ScreenGui สำหรับจอดำโดยเฉพาะ (บังคับเต็มจอทับทุกอย่าง)
+local BlackScreenGui = Instance.new("ScreenGui")
+BlackScreenGui.Name = "WhaleBlackScreenUI"
+BlackScreenGui.IgnoreGuiInset = true -- บังคับให้ล้นขอบจอ ไม่เว้นที่ว่างให้เมนูเกม
+BlackScreenGui.DisplayOrder = 9999 -- ตั้งค่าเลเยอร์ให้สูงที่สุด เพื่อทับ UI ของเกมทั้งหมด
+BlackScreenGui.Parent = CoreGui
 
 -- ==========================================
 -- ระบบการแจ้งเตือน (Custom Notification System) - เบาสุดๆ
@@ -24,12 +36,14 @@ local function Notify(title, message, duration)
     NotificationFrame.Position = UDim2.new(1, 10, 0.85, 0)
     NotificationFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     NotificationFrame.BorderSizePixel = 0
-    NotificationFrame.Parent = ScreenGui
+    NotificationFrame.ZIndex = 100 
+    NotificationFrame.Parent = ScreenGui 
 
     local SideBar = Instance.new("Frame")
     SideBar.Size = UDim2.new(0, 4, 1, 0)
     SideBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     SideBar.BorderSizePixel = 0
+    SideBar.ZIndex = 100
     SideBar.Parent = NotificationFrame
 
     local NotifTitle = Instance.new("TextLabel")
@@ -41,6 +55,7 @@ local function Notify(title, message, duration)
     NotifTitle.Font = Enum.Font.GothamBold
     NotifTitle.TextSize = 13
     NotifTitle.TextXAlignment = Enum.TextXAlignment.Left
+    NotifTitle.ZIndex = 100
     NotifTitle.Parent = NotificationFrame
 
     local NotifMsg = Instance.new("TextLabel")
@@ -52,6 +67,7 @@ local function Notify(title, message, duration)
     NotifMsg.Font = Enum.Font.Gotham
     NotifMsg.TextSize = 12
     NotifMsg.TextXAlignment = Enum.TextXAlignment.Left
+    NotifMsg.ZIndex = 100
     NotifMsg.Parent = NotificationFrame
 
     NotificationFrame:TweenPosition(UDim2.new(1, -230, 0.85, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
@@ -66,54 +82,29 @@ local function Notify(title, message, duration)
 end
 
 -- ==========================================
--- ส่วนที่ 1.1: หน้าต่างใส่รหัสผ่าน (Key System)
+-- สร้างเลเยอร์จอดำ (Black Screen Layer)
 -- ==========================================
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Size = UDim2.new(0, 250, 0, 150)
-KeyFrame.Position = UDim2.new(0.5, -125, 0.5, -75)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-KeyFrame.BorderSizePixel = 0
-KeyFrame.Parent = ScreenGui
-
-local KeyTitle = Instance.new("TextLabel")
-KeyTitle.Size = UDim2.new(1, 0, 0, 40)
-KeyTitle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-KeyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-KeyTitle.Text = "วาฬสุดหล่อ | ใส่รหัส"
-KeyTitle.Font = Enum.Font.GothamBold
-KeyTitle.TextSize = 16
-KeyTitle.BorderSizePixel = 0
-KeyTitle.Parent = KeyFrame
-
-local KeyInput = Instance.new("TextBox")
-KeyInput.Size = UDim2.new(0.8, 0, 0, 35)
-KeyInput.Position = UDim2.new(0.1, 0, 0.4, 0)
-KeyInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-KeyInput.PlaceholderText = "ใส่รหัสผ่านตรงนี้..."
-KeyInput.Font = Enum.Font.Gotham
-KeyInput.TextSize = 14
-KeyInput.Parent = KeyFrame
-
-local KeySubmit = Instance.new("TextButton")
-KeySubmit.Size = UDim2.new(0.8, 0, 0, 35)
-KeySubmit.Position = UDim2.new(0.1, 0, 0.7, 0)
-KeySubmit.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-KeySubmit.TextColor3 = Color3.fromRGB(255, 255, 255)
-KeySubmit.Text = "เข้าสู่ระบบ"
-KeySubmit.Font = Enum.Font.GothamBold
-KeySubmit.TextSize = 14
-KeySubmit.Parent = KeyFrame
+local BlackScreenCover = Instance.new("TextButton")
+BlackScreenCover.Size = UDim2.new(1, 0, 1, 0)
+BlackScreenCover.Position = UDim2.new(0, 0, 0, 0)
+BlackScreenCover.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BlackScreenCover.Text = "แตะหน้าจอเพื่อยกเลิกโหมดจอดำ"
+BlackScreenCover.TextColor3 = Color3.fromRGB(100, 100, 100)
+BlackScreenCover.Font = Enum.Font.GothamBold
+BlackScreenCover.TextSize = 18
+BlackScreenCover.AutoButtonColor = false
+BlackScreenCover.Visible = false
+BlackScreenCover.Parent = BlackScreenGui 
 
 -- ==========================================
--- ส่วนที่ 1.2: หน้าต่างหลัก (Main Hub)
+-- หน้าต่างหลัก (Main Hub)
 -- ==========================================
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 200, 0, 210) 
-MainFrame.Position = UDim2.new(0.5, -100, 0.5, -105)
+MainFrame.Size = UDim2.new(0, 200, 0, 280)  
+MainFrame.Position = UDim2.new(0.5, -100, 0.5, -140)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
+MainFrame.Visible = true 
 MainFrame.Parent = ScreenGui
 
 local MainTitle = Instance.new("TextLabel")
@@ -140,7 +131,7 @@ MinimizeBtn.Parent = MainTitle
 
 local AutoRaidBtn = Instance.new("TextButton")
 AutoRaidBtn.Size = UDim2.new(0.9, 0, 0, 35)
-AutoRaidBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
+AutoRaidBtn.Position = UDim2.new(0.05, 0, 0, 50)
 AutoRaidBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 AutoRaidBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoRaidBtn.Text = "ออโต้ฟาร์มบอส: ปิด"
@@ -148,10 +139,9 @@ AutoRaidBtn.Font = Enum.Font.GothamBold
 AutoRaidBtn.TextSize = 14
 AutoRaidBtn.Parent = MainFrame
 
--- ปุ่มสลับโหมดการจ่าย (Pay Mode)
 local PayModeBtn = Instance.new("TextButton")
 PayModeBtn.Size = UDim2.new(0.9, 0, 0, 35)
-PayModeBtn.Position = UDim2.new(0.05, 0, 0.48, 0)
+PayModeBtn.Position = UDim2.new(0.05, 0, 0, 95)
 PayModeBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
 PayModeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 PayModeBtn.Font = Enum.Font.GothamBold
@@ -160,7 +150,7 @@ PayModeBtn.Parent = MainFrame
 
 local AntiAfkBtn = Instance.new("TextButton")
 AntiAfkBtn.Size = UDim2.new(0.9, 0, 0, 35)
-AntiAfkBtn.Position = UDim2.new(0.05, 0, 0.72, 0)
+AntiAfkBtn.Position = UDim2.new(0.05, 0, 0, 140)
 AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
 AntiAfkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AntiAfkBtn.Text = "กันหลุด: ปิด"
@@ -168,7 +158,79 @@ AntiAfkBtn.Font = Enum.Font.GothamBold
 AntiAfkBtn.TextSize = 14
 AntiAfkBtn.Parent = MainFrame
 
--- ตัวเลือกโหมดการจ่ายเงิน
+-- ==========================================
+-- กล่องพิมพ์ Custom FPS (เริ่มต้น 30)
+-- ==========================================
+local FpsInput = Instance.new("TextBox")
+FpsInput.Size = UDim2.new(0.9, 0, 0, 35)
+FpsInput.Position = UDim2.new(0.05, 0, 0, 185)
+FpsInput.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+FpsInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+FpsInput.PlaceholderText = "พิมพ์ตั้งค่า FPS..."
+FpsInput.Text = "30" 
+FpsInput.Font = Enum.Font.GothamBold
+FpsInput.TextSize = 13
+FpsInput.Parent = MainFrame
+
+-- ==========================================
+-- ปุ่มจอดำประหยัดแบต (Black Screen Low FPS)
+-- ==========================================
+local BlackScreenBtn = Instance.new("TextButton")
+BlackScreenBtn.Size = UDim2.new(0.9, 0, 0, 35)
+BlackScreenBtn.Position = UDim2.new(0.05, 0, 0, 230)
+BlackScreenBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+BlackScreenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BlackScreenBtn.Text = "จอดำ + Low FPS"
+BlackScreenBtn.Font = Enum.Font.GothamBold
+BlackScreenBtn.TextSize = 13
+BlackScreenBtn.Parent = MainFrame
+
+-- ==========================================
+-- การตั้งค่าระบบ ภาพเริ่มต้น (ล็อคกราฟิกระดับ 1) และ FPS 
+-- ==========================================
+
+-- ล็อกกราฟิกระดับ 1 (ต่ำสุด) ทันทีที่รันสคริปต์
+pcall(function()
+    UserSettings():GetService("UserGameSettings").SavedQualityLevel = Enum.SavedQualitySetting.QualityLevel1
+end)
+pcall(function()
+    settings().Rendering.QualityLevel = 1
+end)
+
+-- ล็อค FPS เริ่มต้นที่ 30
+pcall(function() if setfpscap then setfpscap(30) end end)
+
+-- แจ้งเตือนเมื่อรันสคริปต์สำเร็จ
+Notify("PlawanZ", "ปรับภาพระดับต่ำสุด (1) และพร้อมใช้งาน!", 3)
+
+-- เมื่อพิมพ์ตัวเลขลงในกล่อง FPS เสร็จ
+FpsInput.FocusLost:Connect(function()
+    local newFps = tonumber(FpsInput.Text)
+    if newFps then
+        pcall(function() if setfpscap then setfpscap(newFps) end end)
+        Notify("วาฬ", "ล็อค FPS ไว้ที่: " .. newFps, 2)
+    else
+        FpsInput.Text = "30" 
+        pcall(function() if setfpscap then setfpscap(30) end end)
+        Notify("วาฬ", "ใส่เฉพาะตัวเลขเท่านั้น! คืนค่า 30", 2)
+    end
+end)
+
+-- การทำงานปุ่มจอดำ
+BlackScreenBtn.MouseButton1Click:Connect(function()
+    BlackScreenCover.Visible = true
+    pcall(function() if setfpscap then setfpscap(5) end end)
+    Notify("วาฬ", "เปิดโหมดจอดำและจำกัด 5 FPS", 2)
+end)
+
+-- เวลากดที่หน้าจอสีดำให้ยกเลิก
+BlackScreenCover.MouseButton1Click:Connect(function()
+    BlackScreenCover.Visible = false
+    local currentFps = tonumber(FpsInput.Text) or 30
+    pcall(function() if setfpscap then setfpscap(currentFps) end end)
+    Notify("วาฬ", "ปิดจอดำ คืนค่าเป็น " .. currentFps .. " FPS", 2)
+end)
+
 local payModes = {
     {name = "จ่าย: 100Qi", payload = "100Qi", times = 1},
     {name = "จ่าย: 100Sx x10 (1 Sp)", payload = "100Sx", times = 10},
@@ -177,7 +239,6 @@ local payModes = {
 local currentPayModeIndex = 1
 PayModeBtn.Text = payModes[currentPayModeIndex].name
 
--- ฟังก์ชันเมื่อกดปุ่มสลับโหมด
 PayModeBtn.MouseButton1Click:Connect(function()
     currentPayModeIndex = currentPayModeIndex + 1
     if currentPayModeIndex > #payModes then
@@ -186,27 +247,27 @@ PayModeBtn.MouseButton1Click:Connect(function()
     PayModeBtn.Text = payModes[currentPayModeIndex].name
 end)
 
--- ระบบ ย่อ/ขยาย ที่แก้ไขใหม่ (ปิดการมองเห็นปุ่มทั้งหมดแทน)
+-- ระบบ ย่อ/ขยาย 
 local isMinimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
-        -- ซ่อนปุ่มทั้งหมด
         AutoRaidBtn.Visible = false
         PayModeBtn.Visible = false
         AntiAfkBtn.Visible = false
+        FpsInput.Visible = false
+        BlackScreenBtn.Visible = false
         
-        -- ปรับขนาดกรอบให้เหลือแค่หัวข้อ
         MainFrame.Size = UDim2.new(0, 200, 0, 40)
         MinimizeBtn.Text = "+"
     else
-        -- แสดงปุ่มกลับมา
         AutoRaidBtn.Visible = true
         PayModeBtn.Visible = true
         AntiAfkBtn.Visible = true
+        FpsInput.Visible = true
+        BlackScreenBtn.Visible = true
         
-        -- คืนขนาดกรอบกลับเท่าเดิม
-        MainFrame.Size = UDim2.new(0, 200, 0, 210)
+        MainFrame.Size = UDim2.new(0, 200, 0, 280)
         MinimizeBtn.Text = "-"
     end
 end)
@@ -233,7 +294,6 @@ local function MakeDraggable(frame, titleBar)
     end)
 end
 
-MakeDraggable(KeyFrame, KeyTitle)
 MakeDraggable(MainFrame, MainTitle)
 
 -- ==========================================
@@ -244,8 +304,6 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PlayerGui = player:WaitForChild("PlayerGui")
 
-local ValidKey = "1234" -- ตั้งรหัสตรงนี้
-
 local isLocked = false
 local lastAction = ""
 local stopRaid = false
@@ -255,19 +313,6 @@ local isUiEnabled = false
 local antiAfkEnabled = false 
 
 local tpTarget = Vector3.new(4.511472702026367, 3.250000238418579, 14.231565475463867)
-
--- ระบบเข้าสู่ระบบ
-KeySubmit.MouseButton1Click:Connect(function()
-    if KeyInput.Text == ValidKey then
-        KeyFrame:Destroy()
-        MainFrame.Visible = true
-        Notify("PlawanZ", "ยินดีต้อนรับเข้าสู่ระบบครับเสี่ย!", 2.5)
-    else
-        KeyInput.Text = ""
-        KeyInput.PlaceholderText = "รหัสผิด! ลองใหม่"
-        Notify("PlawanZ", "รหัสผ่านไม่ถูกต้อง อดค้าบ!", 2)
-    end
-end)
 
 -- ==========================================
 -- 3. ระบบ Anti-AFK
@@ -510,7 +555,7 @@ task.spawn(function()
                 for i = 1, mode.times do
                     pcall(function() event:InvokeServer("Pay", mode.payload) end)
                     if mode.times > 1 then
-                        task.wait(0.05) -- หน่วงเวลาถ้ารัวหลายรอบ
+                        task.wait(0.05)
                     end
                 end
                 
