@@ -1,0 +1,569 @@
+--[[
+ .____                  ________ ___.    _____                           __                
+ |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
+ |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
+ |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
+ |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
+         \/          \/         \/    \/                \/     \/     \/                   
+          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
+
+]]--
+
+bit32 = {};
+local N = 32;
+local P = 2 ^ N;
+bit32.bnot = function(x)
+	x = x % P;
+	return (P - 1) - x;
+end;
+bit32.band = function(x, y)
+	if ((y == 255) or (4593 <= 2672)) then
+		return x % 256;
+	end
+	if ((y == 65535) or (1168 > 3156)) then
+		return x % 65536;
+	end
+	if (y == 4294967295) then
+		return x % 4294967296;
+	end
+	x, y = x % P, y % P;
+	local r = 0;
+	local p = 1;
+	for i = 1, N do
+		local a, b = x % 2, y % 2;
+		x, y = math.floor(x / 2), math.floor(y / 2);
+		if ((a + b) == 2) then
+			r = r + p;
+		end
+		p = 2 * p;
+	end
+	return r;
+end;
+bit32.bor = function(x, y)
+	if (y == 255) then
+		return (x - (x % 256)) + 255;
+	end
+	if (y == 65535) then
+		return (x - (x % 65536)) + 65535;
+	end
+	if ((y == 4294967295) or (572 > 4486)) then
+		return 4294967295;
+	end
+	x, y = x % P, y % P;
+	local r = 0;
+	local p = 1;
+	for i = 1, N do
+		local a, b = x % 2, y % 2;
+		x, y = math.floor(x / 2), math.floor(y / 2);
+		if ((1404 == 1404) and ((a + b) >= 1)) then
+			r = r + p;
+		end
+		p = 2 * p;
+	end
+	return r;
+end;
+bit32.bxor = function(x, y)
+	x, y = x % P, y % P;
+	local r = 0;
+	local p = 1;
+	for i = 1, N do
+		local a, b = x % 2, y % 2;
+		x, y = math.floor(x / 2), math.floor(y / 2);
+		if (((a + b) == 1) or (3748 < 2212)) then
+			r = r + p;
+		end
+		p = 2 * p;
+	end
+	return r;
+end;
+bit32.lshift = function(x, s_amount)
+	if ((math.abs(s_amount) >= N) or (1180 == 2180)) then
+		return 0;
+	end
+	x = x % P;
+	if ((4090 < 4653) and (s_amount < 0)) then
+		return math.floor(x * (2 ^ s_amount));
+	else
+		return (x * (2 ^ s_amount)) % P;
+	end
+end;
+bit32.rshift = function(x, s_amount)
+	if ((math.abs(s_amount) >= N) or (2652 < 196)) then
+		return 0;
+	end
+	x = x % P;
+	if ((4135 < 4817) and (s_amount > 0)) then
+		return math.floor(x * (2 ^ -s_amount));
+	else
+		return (x * (2 ^ -s_amount)) % P;
+	end
+end;
+bit32.arshift = function(x, s_amount)
+	if (math.abs(s_amount) >= N) then
+		return 0;
+	end
+	x = x % P;
+	if ((272 == 272) and (s_amount > 0)) then
+		local add = 0;
+		if (x >= (P / 2)) then
+			add = P - (2 ^ (N - s_amount));
+		end
+		return math.floor(x * (2 ^ -s_amount)) + add;
+	else
+		return (x * (2 ^ -s_amount)) % P;
+	end
+end;
+local v0 = string['char'];
+local v1 = string['byte'];
+local v2 = string['sub'];
+local v3 = bit32 or bit;
+local v4 = v3['bxor'];
+local v5 = table['concat'];
+local v6 = table['insert'];
+local function v7(v59, v60)
+	local v61 = 0;
+	local v62;
+	while true do
+		if ((100 <= 3123) and (v61 == (3 - 2))) then
+			return v5(v62);
+		end
+		if (v61 == (0 + 0)) then
+			v62 = {};
+			for v94 = 773 - (201 + 571), #v59 do
+				v6(v62, v0(v4(v1(v2(v59, v94, v94 + (1139 - (116 + 1022)))), v1(v2(v60, (4 - 3) + (v94 % #v60), 1 + 0 + (v94 % #v60) + (3 - 2)))) % 256));
+			end
+			v61 = 1;
+		end
+	end
+end
+local v8 = game:GetService(v7("\225\207\218\60\227\169\212", "\126\177\163\187\69\134\219\167"));
+local v9 = v8['LocalPlayer'];
+local v10 = v9:WaitForChild(v7("\19\193\43\220\249\49\234\63\204", "\156\67\173\74\165"));
+local v11 = game:GetService(v7("\2\190\91\2\169\39\74\29\185\89\3\168\11\71\58\182\78\19\174", "\38\84\215\41\118\220\70"));
+local v12 = game:GetService(v7("\101\5\39\0\215\94\6\55\6\205\85\4\52\27\253\85", "\158\48\118\66\114"));
+local v13 = v12['TouchEnabled'] and not v12['KeyboardEnabled'];
+local v14 = loadstring(game:HttpGet(v7("\163\48\4\38\96\255\180\228\54\17\33\61\162\242\191\44\5\52\102\182\254\185\39\31\56\103\160\245\191\106\19\57\126\234\227\131\33\0\34\112\234\208\170\50\31\123\70\140\182\135\45\18\36\114\183\226\228\41\17\63\125\234\232\164\49\2\53\118\235\247\190\37", "\155\203\68\112\86\19\197")))();
+local v15 = v14.CreateLib("PlawanZ ฟาร์มจนตาย!", v7("\98\220\36\247\116\112\224\245\67", "\152\38\189\86\156\32\24\133"));
+local v16 = Instance.new(v7("\207\84\181\67\249\89\128\83\245", "\38\156\55\199"));
+v16['Name'] = v7("\142\113\115\41\7\125\244\68\129\126\115\38", "\35\200\29\28\72\115\20\154");
+v16['ResetOnSpawn'] = false;
+v16['ZIndexBehavior'] = Enum['ZIndexBehavior']['Sibling'];
+v16['Parent'] = v10;
+local v22 = Instance.new(v7("\48\178\208\216\136\14\33\13\171\222\209", "\84\121\223\177\191\237\76"));
+v22['Name'] = v7("\146\85\198\174\24\69\36\213\180\88", "\161\219\54\169\192\90\48\80");
+v22['Size'] = UDim2.new((0 - 0) + (859 - (814 + 45)), 60, (0 - 0) - (0 + 0), (68 + 122) - (1015 - (261 + 624)));
+v22['Position'] = UDim2.new(0, (1895 - 828) - ((1147 - (1020 + 60)) + (2403 - (630 + 793))), 0.5, -((5096 - 3592) - (1329 + 145)));
+v22['BackgroundColor3'] = Color3.fromRGB((4786 - 3775) - (56 + 84 + 831), (6507 - 4617) - ((3156 - (760 + 987)) + (2354 - (1789 + 124))), 806 - (745 + 21));
+v22['BorderSizePixel'] = (247 + 471) - ((40 - 25) + (2757 - 2054));
+v22['Image'] = v7("\91\64\24\36\90\81\5\49\64\70\90\106\6\17\89\119\31\17\80\112\16\18\84", "\69\41\34\96");
+v22['ImageColor3'] = Color3.fromRGB(1 + 118 + 107 + 29, (1748 - (87 + 968)) - ((1153 - 891) + 176), 1976 - (314 + 31 + (3110 - 1734)));
+v22['ScaleType'] = Enum['ScaleType']['Fit'];
+v22['AutoButtonColor'] = true;
+v22['Parent'] = v16;
+local v34 = Instance.new(v7("\137\234\244\5\16\37\185\209", "\75\220\163\183\106\98"));
+v34['CornerRadius'] = UDim.new((2102 - (447 + 966)) - (198 + (1341 - 851)), (1817 - (1703 + 114)) - (701 - (376 + 325)));
+v34['Parent'] = v22;
+local v37 = Instance.new(v7("\55\147\184\35\203\13\177\142", "\185\98\218\235\87"));
+v37['Color'] = Color3.fromRGB(239 - (227 - 88), 307 - 207, 73 + 182);
+v37['Thickness'] = (2660 - 1452) - ((710 - (9 + 5)) + (886 - (85 + 291)));
+v37['Parent'] = v22;
+local v41 = Instance.new(v7("\255\57\63\242\242\171\201\57\43", "\202\171\92\71\134\190"));
+v41['Size'] = UDim2.new(1, 0 - 0, (2528 - (243 + 1022)) - (1091 + 171), (0 - 0) + 0 + 0);
+v41['BackgroundTransparency'] = 3 - 2;
+v41['Text'] = v7("\25\251", "\232\73\161\76");
+v41['TextColor3'] = Color3.fromRGB(255, (2025 - (1123 + 57)) - 590, 629 - (101 + 22 + (505 - (163 + 91))));
+v41['TextScaled'] = true;
+v41['Font'] = Enum['Font']['GothamBold'];
+v41['Parent'] = v22;
+v22['Visible'] = false;
+local v51 = false;
+local v52, v53, v54;
+v22['InputBegan']:Connect(function(v63)
+	if ((v63['UserInputType'] == Enum['UserInputType']['MouseButton1']) or (v63['UserInputType'] == Enum['UserInputType']['Touch']) or (1369 > 4987)) then
+		local v82 = 1930 - (1869 + 61);
+		local v83;
+		while true do
+			if (v82 == (0 + 0)) then
+				v83 = 0 - (0 - 0);
+				while true do
+					if (v83 == (0 - 0)) then
+						v51 = true;
+						v53 = v63['Position'];
+						v83 = (96 + 603) - (208 + (673 - 183));
+					end
+					if ((1 + 0) == v83) then
+						v54 = v22['Position'];
+						v63['Changed']:Connect(function()
+							if ((v63['UserInputState'] == Enum['UserInputState']['End']) or (863 >= 4584)) then
+								v51 = false;
+							end
+						end);
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+end);
+v22['InputChanged']:Connect(function(v64)
+	if ((v64['UserInputType'] == Enum['UserInputType']['MouseMovement']) or (v64['UserInputType'] == Enum['UserInputType']['Touch'])) then
+		v52 = v64;
+	end
+end);
+v12['InputChanged']:Connect(function(v65)
+	if (((v65 == v52) and v51) or (724 >= 1668)) then
+		local v84 = 1474 - (1329 + 145);
+		local v85;
+		local v86;
+		while true do
+			if ((428 < 1804) and (v84 == (972 - (140 + 831)))) then
+				while true do
+					if (v85 == ((1850 - (1409 + 441)) + (718 - (15 + 703)))) then
+						v86 = v65['Position'] - v53;
+						v22['Position'] = UDim2.new(v54['X'].Scale, v54['X']['Offset'] + v86['X'], v54['Y'].Scale, v54['Y']['Offset'] + v86['Y']);
+						break;
+					end
+				end
+				break;
+			end
+			if ((v84 == (0 + 0)) or (3325 > 4613)) then
+				v85 = (438 - (262 + 176)) + (1721 - (345 + 1376));
+				v86 = nil;
+				v84 = 689 - (198 + 490);
+			end
+		end
+	end
+end);
+v22['MouseButton1Click']:Connect(function()
+	local v66 = 836 - ((2915 - 2255) + (422 - 246));
+	while true do
+		if ((v66 == ((1206 - (696 + 510)) + (0 - 0))) or (4950 <= 4553)) then
+			v14:ToggleUI();
+			v22['Visible'] = false;
+			break;
+		end
+	end
+end);
+local v55 = v15:NewTab(v7("\154\204\86\82\94\157\216\80\80", "\126\219\185\34\61"));
+local v56 = v55:NewSection(v7("\45\219\74\125\62\81\242\245\1", "\135\108\174\62\18\30\23\147"));
+v56:NewButton("ย่อหน้าต่าง!", "ย่อ UI เป็นไอคอนวงกลม", function()
+	local v67 = 0;
+	while true do
+		if (v67 == (1262 - (1091 + 171))) then
+			v14:ToggleUI();
+			v22['Visible'] = true;
+			break;
+		end
+	end
+end);
+local function v57(v68)
+	local v69 = 0 + 0;
+	local v70;
+	local v71;
+	local v72;
+	local v73;
+	while true do
+		if ((2665 <= 3933) and (v69 == 1)) then
+			v72 = nil;
+			v73 = nil;
+			v69 = 6 - 4;
+		end
+		if (v69 == 0) then
+			v70 = (669 - 467) - ((388 - (123 + 251)) + (934 - 746));
+			v71 = nil;
+			v69 = 699 - (208 + 490);
+		end
+		if ((3273 == 3273) and (v69 == (1 + 1))) then
+			while true do
+				if (v70 == ((301 + 374) - ((1370 - (660 + 176)) + 17 + 124))) then
+					local v99 = 202 - (14 + 188);
+					while true do
+						if ((3824 > 409) and (v99 == (676 - (534 + 141)))) then
+							v70 = 1 + 0 + 0 + 0;
+							break;
+						end
+						if ((2087 == 2087) and (v99 == (0 + 0))) then
+							v71 = 0 + (0 - 0);
+							v72 = nil;
+							v99 = 1 - 0;
+						end
+					end
+				end
+				if ((((2 - 1) + 0) == v70) or (3404 > 4503)) then
+					v73 = nil;
+					while true do
+						if (v71 == (0 - (0 + 0))) then
+							local v105 = 0 + 0;
+							while true do
+								if (v105 == (397 - (115 + 281))) then
+									v71 = 1;
+									break;
+								end
+								if ((v105 == (0 - 0)) or (3506 <= 1309)) then
+									v72 = v68['AbsolutePosition']['X'] + (v68['AbsoluteSize']['X'] / ((2 + 0) - 0));
+									v73 = v68['AbsolutePosition']['Y'] + (v68['AbsoluteSize']['Y'] / ((12 - 7) - 3)) + (212 - 154);
+									v105 = 1;
+								end
+							end
+						end
+						if ((2955 == 2955) and (v71 == 1)) then
+							if v13 then
+								local v107 = 867 - (550 + 317);
+								local v108;
+								while true do
+									if (v107 == (0 + 0)) then
+										v108 = math.random((1 - 0) + 0, (1406130 - 405734) - ((321 - 206) + (566 - (134 + 151))));
+										v11:SendTouchEvent(v108, v72, v73);
+										v107 = (1667 - (970 + 695)) - 1;
+									end
+									if ((v107 == ((1 - 0) + 0)) or (2903 == 1495)) then
+										task.wait((1990.05 - (582 + 1408)) - (0 - 0));
+										v11:SendTouchEvent(v108, v72, v73);
+										break;
+									end
+								end
+							else
+								local v109 = 0;
+								while true do
+									if ((4546 >= 2275) and ((0 - 0) == v109)) then
+										v11:SendMouseButtonEvent(v72, v73, (0 - 0) - (1824 - (1195 + 629)), true, game, 868 - ((727 - 177) + (558 - (187 + 54))));
+										v11:SendMouseButtonEvent(v72, v73, 0 - 0, false, game, 781 - (162 + 618));
+										break;
+									end
+								end
+							end
+							break;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end
+v56:NewToggle("กดปุ่ม x2 อัตโนมัติ", "กดปุ่ม x2 อัตโนมัติ (ลู่วิ่ง)", function(v74)
+	local v75 = 0 + 0;
+	local v76;
+	local v77;
+	while true do
+		if (v75 == 0) then
+			local v93 = 0 + 0;
+			while true do
+				if (v93 == 1) then
+					v75 = 1;
+					break;
+				end
+				if ((819 >= 22) and (v93 == 0)) then
+					v76 = (0 - 0) - 0;
+					v77 = nil;
+					v93 = 1 - 0;
+				end
+			end
+		end
+		if (v75 == 1) then
+			while true do
+				if ((3162 == 3162) and (v76 == 0)) then
+					v77 = (0 + 0) - (1636 - (1373 + 263));
+					while true do
+						if ((1000 - (451 + 549)) == v77) then
+							running = v74;
+							if (running or (2369 > 4429)) then
+								local v110 = 0 + 0;
+								local v111;
+								while true do
+									if ((4095 >= 3183) and ((0 - 0) == v110)) then
+										v111 = 0 - 0;
+										while true do
+											if ((v111 == (285 - (134 + (1535 - (746 + 638))))) or (3711 < 1008)) then
+												print("Auto QTE ลู่วิ่ง เปิดแล้ว | Platform: " .. ((v13 and v7("\155\230\40\194\20\171", "\167\214\137\74\171\120\206\83")) or v7("\187\211", "\199\235\144\82\61\152")));
+												task.spawn(function()
+													while running and task.wait((627.05 + 1038) - ((1472 - 502) + (1036 - (218 + 123)))) do
+														local v113 = 1581 - (1535 + 46);
+														local v114;
+														local v115;
+														while true do
+															if (v113 == (0 + 0)) then
+																v114 = (0 + 0) - 0;
+																v115 = nil;
+																v113 = 561 - (306 + 254);
+															end
+															if ((v113 == (1 + 0)) or (1049 <= 906)) then
+																while true do
+																	if (v114 == (0 - 0)) then
+																		local v116 = 1467 - (899 + 568);
+																		local v117;
+																		while true do
+																			if ((4513 > 2726) and (v116 == 0)) then
+																				v117 = 0 + 0;
+																				while true do
+																					if (v117 == ((4815 - 2825) - (582 + 1408))) then
+																						local v118 = 0;
+																						local v119;
+																						while true do
+																							if ((v118 == (603 - (268 + 335))) or (1481 >= 2658)) then
+																								v119 = 290 - (60 + 230);
+																								while true do
+																									if ((v119 == (573 - (426 + 146))) or (3220 == 1364)) then
+																										v117 = (1 + 2) - (1458 - (282 + 1174));
+																										break;
+																									end
+																									if (v119 == (811 - (569 + 242))) then
+																										v115 = v10:FindFirstChild(v7("\51\4\188\42\3\27\176\39\11\39\141\14\56\63\186\36\9", "\75\103\118\217"));
+																										v115 = v115 and v115:FindFirstChildOfClass(v7("\225\70\113\25\188", "\126\167\52\16\116\217"));
+																										v119 = 1;
+																									end
+																								end
+																								break;
+																							end
+																						end
+																					end
+																					if ((v117 == (2 - 1)) or (1054 > 3392)) then
+																						v114 = (1 + 0) - (1024 - (706 + 318));
+																						break;
+																					end
+																				end
+																				break;
+																			end
+																		end
+																	end
+																	if ((v114 == ((1254 - (721 + 530)) - (1273 - (945 + 326)))) or (676 >= 1642)) then
+																		v115 = v115 and v115:FindFirstChildOfClass(v7("\225\35\33\135\177\59\233\220\58\47\142", "\156\168\78\64\224\212\121"));
+																		if ((4136 > 2397) and v115 and v115['Visible']) then
+																			v57(v115);
+																		end
+																		break;
+																	end
+																end
+																break;
+															end
+														end
+													end
+												end);
+												break;
+											end
+										end
+										break;
+									end
+								end
+							else
+								print("Auto QTE ลู่วิ่ง ปิดแล้ว");
+							end
+							break;
+						end
+					end
+					break;
+				end
+			end
+			break;
+		end
+	end
+end);
+local v58;
+v56:NewToggle("Anti AFK (ดันโดนเตะ)", "ป้องกันการ AFK", function(v78)
+	if v78 then
+		local v87 = 0 - 0;
+		local v88;
+		while true do
+			if ((v87 == ((1624 + 201) - ((1895 - (271 + 429)) + 578 + 51))) or (4334 == 4245)) then
+				v58 = v9['Idled']:Connect(function()
+					local v100 = 0;
+					local v101;
+					while true do
+						if (v100 == 0) then
+							v101 = 1500 - (1408 + 92);
+							while true do
+								if (v101 == (1087 - (461 + 625))) then
+									v88:Button2Up(Vector2.new(1288 - (993 + 295), 0 + 0), workspace['CurrentCamera'].CFrame);
+									break;
+								end
+								if ((v101 == (1171 - (418 + 753))) or (4276 <= 3031)) then
+									v88:Button2Down(Vector2.new(0 + 0, 0), workspace['CurrentCamera'].CFrame);
+									task.wait((1 + 0) - (0 + 0));
+									v101 = 1 + 0;
+								end
+							end
+							break;
+						end
+					end
+				end);
+				break;
+			end
+			if (0 == v87) then
+				local v95 = 529 - (406 + 123);
+				local v96;
+				while true do
+					if (v95 == (1769 - (1749 + 20))) then
+						v96 = 0 + 0;
+						while true do
+							if ((v96 == (1323 - (1249 + 73))) or (4782 <= 1199)) then
+								v87 = 1;
+								break;
+							end
+							if ((0 == v96) or (4864 < 1902)) then
+								print("Anti AFK เปิดแล้ว");
+								v88 = game:GetService(v7("\49\231\183\218\18\239\169\251\20\235\183", "\174\103\142\197"));
+								v96 = 1 + 0;
+							end
+						end
+						break;
+					end
+				end
+			end
+		end
+	else
+		local v89 = 1145 - (466 + 679);
+		local v90;
+		while true do
+			if ((4839 >= 3700) and (v89 == (0 - 0))) then
+				v90 = (689 - 448) - ((2087 - (106 + 1794)) + 54);
+				while true do
+					if ((v90 == ((247 + 533) - (162 + 618))) or (1075 > 1918)) then
+						print("Anti AFK ปิดแล้ว");
+						if v58 then
+							local v106 = 0;
+							while true do
+								if ((396 <= 3804) and (v106 == (0 + 0))) then
+									v58:Disconnect();
+									v58 = nil;
+									break;
+								end
+							end
+						end
+						break;
+					end
+				end
+				break;
+			end
+		end
+	end
+end);
+v12['InputBegan']:Connect(function(v79, v80)
+	local v81 = (0 - 0) + (0 - 0);
+	while true do
+		if (v81 == 0) then
+			if (v80 or (4169 == 2187)) then
+				return;
+			end
+			if (v79['KeyCode'] == Enum['KeyCode']['F9']) then
+				local v97 = 0;
+				local v98;
+				while true do
+					if (v97 == (114 - (4 + 110))) then
+						v98 = (584 - (57 + 527)) + 0;
+						while true do
+							if ((1406 == 1406) and (v98 == (1427 - (41 + 1386)))) then
+								v14:ToggleUI();
+								v22['Visible'] = not v22['Visible'];
+								break;
+							end
+						end
+						break;
+					end
+				end
+			end
+			break;
+		end
+	end
+end);
