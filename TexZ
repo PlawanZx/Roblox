@@ -143,22 +143,29 @@ task.spawn(function()
         task.wait(0.1)
         mainFrame.Position = UDim2.new(0.5, -(mainFrame.AbsoluteSize.X * 0.62) / 2, 0.05, 0)
 
-        -- เพิ่มระบบลากด้วยนิ้ว (Touch Drag)
+        -- ✅ เพิ่มระบบลากด้วยนิ้ว เฉพาะแถบหัวเท่านั้น (ไม่บล็อก Scroll)
         local dragging = false
         local dragStart = nil
         local frameStartPos = nil
+        local TOPBAR_HEIGHT = 50 -- px (ความสูงแถบหัวสำหรับลาก)
 
-        -- หา TopBar ของ Kavo (ลองหลายชื่อ)
-        local dragTarget = mainFrame:FindFirstChild("TopBar")
-                        or mainFrame:FindFirstChild("Bar")
-                        or mainFrame:FindFirstChild("Title")
-                        or mainFrame
+        -- ฟังก์ชันเช็คว่านิ้วอยู่ในโซนแถบหัวของหน้าต่างหรือเปล่า
+        local function isTouchOnTopBar(touchPos)
+            local frameAbsY = mainFrame.AbsolutePosition.Y
+            local relY = touchPos.Y - frameAbsY
+            -- อยู่ใน 50px บนสุดของหน้าต่าง = โซนลาก
+            return relY >= 0 and relY <= TOPBAR_HEIGHT
+        end
 
-        dragTarget.InputBegan:Connect(function(input)
+        -- ✅ ใช้ UserInputService แทน InputBegan บน Frame
+        -- เพื่อให้ ScrollingFrame ยังรับ touch ได้ตามปกติ
+        UserInputService.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                dragStart = input.Position
-                frameStartPos = mainFrame.Position
+                if isTouchOnTopBar(input.Position) then
+                    dragging = true
+                    dragStart = input.Position
+                    frameStartPos = mainFrame.Position
+                end
             end
         end)
 
