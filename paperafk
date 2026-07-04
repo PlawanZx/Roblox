@@ -1,1 +1,218 @@
+local player = game:GetService("Players").LocalPlayer
+local vim = game:GetService("VirtualInputManager")
+local vu = game:GetService("VirtualUser")
+local playerGui = player:WaitForChild("PlayerGui")
 
+-- ลบ UI เก่าออกถ้ารันสคริปต์ซ้ำ
+local oldGuiCore = game.CoreGui:FindFirstChild("AutoFarmHub")
+local oldGuiPlayer = playerGui:FindFirstChild("AutoFarmHub")
+if oldGuiCore then oldGuiCore:Destroy() end
+if oldGuiPlayer then oldGuiPlayer:Destroy() end
+
+local Toggles = {
+    AutoX2 = false,
+    AutoCollect = false,
+    HideHUD = false
+}
+
+-----------------------------------
+-- 1. Anti-AFK
+-----------------------------------
+player.Idled:Connect(function()
+    vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    print("Anti-AFK ทำงาน")
+end)
+
+-----------------------------------
+-- 2. UI
+-----------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AutoFarmHub"
+ScreenGui.ResetOnSpawn = false
+local ok = pcall(function() ScreenGui.Parent = game.CoreGui end)
+if not ok then ScreenGui.Parent = playerGui end
+
+local FULL_HEIGHT = 240
+local MINI_HEIGHT = 40
+local isMinimized = false
+local TweenService = game:GetService("TweenService")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 250, 0, FULL_HEIGHT)
+MainFrame.Position = UDim2.new(0.5, -125, 0.4, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundTransparency = 1
+TitleBar.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -90, 1, 0)  -- เว้นที่ 2 ปุ่ม
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "AUTO FARM HUB"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
+
+-- ฟังก์ชันสร้างปุ่มบน TitleBar
+local function createTitleButton(text, xOffset, bgColor)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0, 30, 0, 30)
+    Btn.Position = UDim2.new(1, xOffset, 0, 5)
+    Btn.BackgroundColor3 = bgColor
+    Btn.Text = text
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 14
+    Btn.Parent = TitleBar
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = Btn
+    return Btn
+end
+
+-- ปุ่ม Minimize (—)
+local MinimizeBtn = createTitleButton("—", -72, Color3.fromRGB(80, 80, 80))
+MinimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    local targetH = isMinimized and MINI_HEIGHT or FULL_HEIGHT
+    TweenService:Create(
+        MainFrame,
+        TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        { Size = UDim2.new(0, 250, 0, targetH) }
+    ):Play()
+    MinimizeBtn.Text = isMinimized and "▲" or "—"
+end)
+
+-- ปุ่ม Close (✕)
+local CloseBtn = createTitleButton("✕", -36, Color3.fromRGB(200, 50, 50))
+CloseBtn.MouseButton1Click:Connect(function()
+    -- Tween fade out แล้วค่อย Destroy
+    TweenService:Create(
+        MainFrame,
+        TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        { Size = UDim2.new(0, 250, 0, 0) }
+    ):Play()
+    task.wait(0.25)
+    ScreenGui:Destroy()
+end)
+
+-- Button Container
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Size = UDim2.new(1, 0, 1, -40)
+ButtonContainer.Position = UDim2.new(0, 0, 0, 40)
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Parent = MainFrame
+
+local function createButton(name, yPos, toggleKey, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0, 200, 0, 40)
+    Button.Position = UDim2.new(0.5, -100, 0, yPos)
+    Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    Button.Text = name .. " [OFF]"
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.GothamBold
+    Button.TextSize = 14
+    Button.Parent = ButtonContainer
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 8)
+    c.Parent = Button
+    Button.MouseButton1Click:Connect(function()
+        Toggles[toggleKey] = not Toggles[toggleKey]
+        if Toggles[toggleKey] then
+            Button.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+            Button.Text = name .. " [ON]"
+        else
+            Button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            Button.Text = name .. " [OFF]"
+        end
+        if callback then callback(Toggles[toggleKey]) end
+    end)
+    return Button
+end
+
+createButton("Auto X2 Button", 10, "AutoX2")
+createButton("Auto Collect Pad", 70, "AutoCollect")
+createButton("Hide HUD", 130, "HideHUD", function(isHiding)
+    local huds = {
+        playerGui:FindFirstChild("TopHud"),
+        playerGui:FindFirstChild("BottomHud"),
+        playerGui:FindFirstChild("BottomLeftHud"),
+        playerGui:FindFirstChild("BottomRightHud"),
+        playerGui:FindFirstChild("CenterHud"),
+        playerGui:FindFirstChild("LeftHud"),
+        playerGui:FindFirstChild("RightHud")
+    }
+    local isVisible = not isHiding
+    for _, hud in pairs(huds) do
+        if hud then
+            if hud:IsA("ScreenGui") then hud.Enabled = isVisible
+            elseif hud:IsA("GuiObject") then hud.Visible = isVisible
+            end
+        end
+    end
+end)
+
+-----------------------------------
+-- 3. Loops
+-----------------------------------
+task.spawn(function()
+    while task.wait(0.2) do
+        if Toggles.AutoX2 then
+            local s, button = pcall(function()
+                return player.PlayerGui.OnScreenEffects.DoubleTemplate.Button
+            end)
+            if s and button and button:IsA("ImageButton") and button.Visible then
+                local tx = button.AbsolutePosition.X + (button.AbsoluteSize.X / 2)
+                local ty = button.AbsolutePosition.Y + (button.AbsoluteSize.Y / 2) + 36
+                vim:SendMouseButtonEvent(tx, ty, 0, true, game, 1)
+                task.wait(0.05)
+                vim:SendMouseButtonEvent(tx, ty, 0, false, game, 1)
+                print("AutoX2: กดปุ่มสำเร็จ!")
+                task.wait(1.5)
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    local targetName = "CollectPad"
+    local maxDistance = 60
+    while task.wait(0.5) do
+        if Toggles.AutoCollect then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = character.HumanoidRootPart
+                local myBase = rootPart.Position
+                for _, item in pairs(workspace.Live.Debris:GetChildren()) do
+                    if not Toggles.AutoCollect then break end
+                    if item.Name == targetName and item:GetPivot() then
+                        local dist = (item:GetPivot().Position - myBase).Magnitude
+                        if dist <= maxDistance then
+                            local cur = rootPart.CFrame
+                            rootPart.CFrame = item:GetPivot()
+                            task.wait(0.05)
+                            rootPart.CFrame = cur
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
